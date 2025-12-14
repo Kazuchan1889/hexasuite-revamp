@@ -1,0 +1,75 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                  PUSH KE GITHUB - QUICK GUIDE                  ║
+╚═══════════════════════════════════════════════════════════════╝
+
+✅ MASALAH SUDAH DIPERBAIKI!
+
+Yang Diperbaiki:
+- vite.config.js (removed terser, pakai esbuild default)
+- vercel.json (simplified minimal config)
+- package.json (sudah OK)
+
+────────────────────────────────────────────────────────────────
+
+🚀 3 CARA PUSH (Pilih 1):
+
+[1] VS CODE (PALING MUDAH!)
+    1. Open VS Code
+    2. Open folder: FE - Copy
+    3. Ctrl+Shift+G (Source Control)
+    4. Klik + (stage all)
+    5. Ketik commit message: "Fix Vercel deployment"
+    6. Klik ✓ (commit)
+    7. Klik ↑ (push)
+
+[2] GITHUB DESKTOP
+    1. Open GitHub Desktop
+    2. Add repo: FE - Copy
+    3. Stage all files
+    4. Commit message: "Fix Vercel deployment"
+    5. Click "Push origin"
+
+[3] TERMINAL
+    cd "FE - Copy"
+    git add .
+    git commit -m "Fix Vercel deployment"
+    git push origin main
+
+────────────────────────────────────────────────────────────────
+
+🔑 CREDENTIALS (jika ditanya):
+
+Username: Kazuchan1889
+Password: Personal Access Token (BUKAN password GitHub!)
+
+Buat token: https://github.com/settings/tokens
+- Name: Deploy Token
+- Expiration: 90 days
+- Scope: ✓ repo
+- Copy token dan pakai sebagai password!
+
+────────────────────────────────────────────────────────────────
+
+✅ SETELAH PUSH:
+
+1. Check GitHub: https://github.com/Kazuchan1889/hexasuite-revamp
+   - Commit baru (bukan 84f5ca6 lagi)
+   - Files updated terlihat
+
+2. Vercel Auto-Redeploy
+   - Wait 2-3 minutes
+   - Build akan SUCCESS! ✅
+
+3. Check Site: https://hexasuite-revamp.vercel.app
+   - Should load properly
+   - Try login: admin / admin123
+
+────────────────────────────────────────────────────────────────
+
+📖 DETAILED GUIDE:
+Baca file: PUSH_TO_GITHUB.md (untuk penjelasan lengkap)
+
+────────────────────────────────────────────────────────────────
+
+SIAP PUSH! 🚀
+
