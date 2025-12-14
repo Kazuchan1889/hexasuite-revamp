@@ -15,10 +15,35 @@ export default function Attendance() {
   const [submitting, setSubmitting] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [detailAttendance, setDetailAttendance] = useState(null)
+  const [sortOrder, setSortOrder] = useState('desc') // 'asc' or 'desc'
+  const [statusFilter, setStatusFilter] = useState('all') // 'all', 'early', 'onTime', 'almostLate', 'late', 'izin', 'sakit', 'alfa', 'breakLate', 'earlyLeave', 'belumAbsen'
+  const [userRequests, setUserRequests] = useState([]) // Store user's requests to check daily limit
 
   useEffect(() => {
     load()
+    loadUserRequests()
   }, [])
+
+  async function loadUserRequests() {
+    try {
+      const token = localStorage.getItem('token')
+      const res = await axios.get('http://localhost:4000/api/attendance-status-requests', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setUserRequests(res.data || [])
+    } catch (err) {
+      console.error('Error loading user requests:', err)
+    }
+  }
+
+  // Check if user has pending request for a specific date
+  function hasPendingRequestForDate(date) {
+    return userRequests.some(req => {
+      if (req.status !== 'Pending') return false
+      const requestDate = req.Attendance?.date || req.attendance?.date
+      return requestDate === date
+    })
+  }
 
   async function load() {
     try {
@@ -33,15 +58,39 @@ export default function Attendance() {
   }
 
   function openRequestModal(attendance) {
+    // Check if user has already made a request for today
+    const today = new Date().toISOString().slice(0, 10)
+    if (attendance.date === today && hasPendingRequestForDate(today)) {
+      alert('Anda sudah membuat request perubahan status absensi untuk hari ini. Setiap user hanya dapat membuat 1 request per hari. Silakan tunggu admin memproses request Anda.')
+      return
+    }
+    
     // Determine current status and requested status options
     let currentStatus = ''
     let requestedStatusOptions = []
     
+    // Check what status can be changed
     if (attendance.checkInStatus === 'late') {
       currentStatus = 'late'
       requestedStatusOptions = [
         { value: 'onTime', label: 'On Time' },
         { value: 'almostLate', label: 'Almost Late' }
+      ]
+    } else if (attendance.checkInStatus === 'almostLate') {
+      currentStatus = 'almostLate'
+      requestedStatusOptions = [
+        { value: 'onTime', label: 'On Time' }
+      ]
+    } else if (attendance.checkInStatus === 'early') {
+      currentStatus = 'early'
+      requestedStatusOptions = [
+        { value: 'onTime', label: 'On Time' }
+      ]
+    } else if (attendance.checkInStatus === 'onTime') {
+      // User can request to change onTime to something else if needed
+      currentStatus = 'onTime'
+      requestedStatusOptions = [
+        { value: 'early', label: 'Come Early' }
       ]
     } else if (attendance.breakLate) {
       currentStatus = 'breakLate'
@@ -53,10 +102,26 @@ export default function Attendance() {
       requestedStatusOptions = [
         { value: 'onTimeCheckout', label: 'On Time Checkout (Hapus Early Leave)' }
       ]
+    } else if (attendance.checkIn && attendance.status === 'Hadir') {
+      // If has check in but no specific status, allow general request
+      currentStatus = 'general'
+      requestedStatusOptions = [
+        { value: 'onTime', label: 'On Time' },
+        { value: 'early', label: 'Come Early' }
+      ]
+    }
+    
+    // If no specific status to change, allow general request
+    if (!currentStatus && attendance.checkIn) {
+      currentStatus = 'general'
+      requestedStatusOptions = [
+        { value: 'onTime', label: 'On Time' },
+        { value: 'early', label: 'Come Early' }
+      ]
     }
     
     if (!currentStatus) {
-      alert('Tidak ada status yang dapat diubah untuk absensi ini')
+      alert('Tidak dapat membuat request untuk absensi ini. Pastikan Anda sudah check in.')
       return
     }
     
@@ -91,6 +156,8 @@ export default function Attendance() {
       setShowRequestModal(false)
       setRequestForm({ currentStatus: '', requestedStatus: '', description: '' })
       setSelectedAttendance(null)
+      await load() // Reload attendance list
+      await loadUserRequests() // Reload user requests to update daily limit check
     } catch (err) {
       console.error(err)
       alert(err.response?.data?.message || 'Gagal mengirim request')
@@ -115,139 +182,286 @@ export default function Attendance() {
       }`}>
         <div className="flex items-center justify-between mb-6">
           <h2 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Riwayat Absensi</h2>
-          <div className={`text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{list.length} catatan</div>
+          <div className={`text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            {(() => {
+              // Calculate filtered count
+              let filteredCount = list.filter(a => {
+                if (statusFilter === 'all') return true
+                if (statusFilter === 'early') return a.checkInStatus === 'early'
+                if (statusFilter === 'onTime') return a.checkInStatus === 'onTime'
+                if (statusFilter === 'almostLate') return a.checkInStatus === 'almostLate'
+                if (statusFilter === 'late') return a.checkInStatus === 'late'
+                if (statusFilter === 'hadir') return a.status === 'Hadir' && a.checkIn && !a.checkInStatus
+                if (statusFilter === 'izin') return a.status === 'Izin'
+                if (statusFilter === 'sakit') return a.status === 'Sakit'
+                if (statusFilter === 'alfa') return a.status === 'Alfa'
+                if (statusFilter === 'breakLate') return a.breakLate === true
+                if (statusFilter === 'earlyLeave') return a.earlyLeave === true
+                if (statusFilter === 'belumAbsen') return !a.checkIn && a.status !== 'Izin' && a.status !== 'Sakit' && a.status !== 'Alfa'
+                return true
+              }).length
+              return statusFilter !== 'all' ? `${filteredCount} dari ${list.length} catatan` : `${list.length} catatan`
+            })()}
+          </div>
         </div>
-        <div className="space-y-3">
-          {list.length === 0 && (
-            <div className="text-center py-12">
-              <svg className={`w-16 h-16 mx-auto mb-4 transition-colors ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <p className={`transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Belum ada catatan absensi</p>
+
+        {/* Filter Section */}
+        <div className={`mb-6 p-4 rounded-lg border transition-colors ${
+          theme === 'dark' 
+            ? 'bg-gray-700/50 border-gray-600' 
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Sort Order Filter */}
+            <div>
+              <label className={`block text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                Urutkan Berdasarkan Tanggal
+              </label>
+              <select
+                value={sortOrder}
+                onChange={e => setSortOrder(e.target.value)}
+                className={`w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
+                  theme === 'dark' 
+                    ? 'bg-gray-700 border-gray-600 text-white' 
+                    : 'bg-white border-gray-300'
+                }`}
+              >
+                <option value="desc">Terbaru → Terlama (Descending)</option>
+                <option value="asc">Terlama → Terbaru (Ascending)</option>
+              </select>
             </div>
-          )}
-          {list.map((a) => (
-            <div 
-              key={a.id} 
-              className={`card transition-colors cursor-pointer ${
-                theme === 'dark' 
-                  ? 'bg-gray-700 border-gray-600 hover:border-indigo-500' 
-                  : 'bg-white border-gray-200 hover:border-indigo-300'
-              }`}
-              onClick={() => {
-                setDetailAttendance(a)
-                setShowDetailModal(true)
-              }}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                    <div className={`font-semibold transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{a.date}</div>
-                    {/* Status Izin/Sakit/Alfa - tampilkan jika bukan Hadir */}
-                    {a.status === 'Izin' && (
-                      <span className="status-chip status-warning">
-                        Izin
-                      </span>
-                    )}
-                    {a.status === 'Sakit' && (
-                      <span className="status-chip status-danger">
-                        Sakit
-                      </span>
-                    )}
-                    {a.status === 'Alfa' && (
-                      <span className="status-chip status-default">
-                        Alfa
-                      </span>
-                    )}
-                    {/* Status Check In - tampilkan sebagai status utama jika Hadir */}
-                    {a.status === 'Hadir' && a.checkIn && a.checkInStatus && (
-                      <span
-                        className={`status-chip font-semibold ${
-                          a.checkInStatus === 'onTime'
-                            ? 'bg-green-100 text-green-800 border-2 border-green-400'
-                            : a.checkInStatus === 'almostLate'
-                            ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400'
-                            : 'bg-red-100 text-red-800 border-2 border-red-400'
-                        }`}
-                      >
-                        {a.checkInStatus === 'onTime' ? '✓ On Time' : a.checkInStatus === 'almostLate' ? '⚠ Almost Late' : '✗ Late'}
-                      </span>
-                    )}
-                    {/* Jika Hadir tapi belum ada checkInStatus, tampilkan Hadir */}
-                    {a.status === 'Hadir' && a.checkIn && !a.checkInStatus && (
-                      <span className="status-chip status-success">
-                        Hadir
-                      </span>
-                    )}
-                    {/* Status Break Late */}
-                    {a.breakLate && (
-                      <span className="status-chip bg-orange-100 text-orange-800 border border-orange-300 font-medium">
-                        ⏰ Break Late
-                      </span>
-                    )}
-                    {/* Status Early Leave */}
-                    {a.earlyLeave && (
-                      <span className="status-chip bg-blue-100 text-blue-800 border border-blue-300 font-medium">
-                        🏃 Early Leave
-                      </span>
-                    )}
-                    {/* Jika tidak ada status apapun */}
-                    {!a.checkIn && a.status !== 'Izin' && a.status !== 'Sakit' && a.status !== 'Alfa' && (
-                      <span className="status-chip status-default">
-                        Belum Absen
-                      </span>
-                    )}
-                    {/* Button to request status change if there's a problematic status */}
-                    {(a.checkInStatus === 'late' || a.breakLate || a.earlyLeave) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          openRequestModal(a)
-                        }}
-                        className="px-3 py-1 text-xs font-medium bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
-                      >
-                        Request Perubahan
-                      </button>
-                    )}
-                  </div>
-                  <div className={`text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                    <div className="flex flex-wrap gap-3">
-                      <span className="inline-flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        CheckIn: {a.checkIn || '-'}
-                      </span>
-                      {(a.breakStart || a.breakEnd) && (
-                        <span className="inline-flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Break: {a.breakStart || '-'} - {a.breakEnd || '-'}
-                        </span>
-                      )}
-                      <span className="inline-flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        CheckOut: {a.checkOut || '-'}
-                      </span>
-                    </div>
-                  </div>
-                  {a.note && (
-                    <div className={`text-sm rounded-lg p-2 border transition-colors ${
-                      theme === 'dark' 
-                        ? 'text-gray-300 bg-gray-600 border-gray-500' 
-                        : 'text-gray-600 bg-gray-50 border-gray-200'
-                    }`}>
-                      {a.note}
-                    </div>
-                  )}
+
+            {/* Status Filter */}
+            <div>
+              <label className={`block text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                Filter Berdasarkan Status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+                className={`w-full p-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
+                  theme === 'dark' 
+                    ? 'bg-gray-700 border-gray-600 text-white' 
+                    : 'bg-white border-gray-300'
+                }`}
+              >
+                <option value="all">Semua Status</option>
+                <option value="early">⏰ Come Early</option>
+                <option value="onTime">✓ On Time</option>
+                <option value="almostLate">⚠ Almost Late</option>
+                <option value="late">✗ Late</option>
+                <option value="hadir">✓ Hadir (Umum)</option>
+                <option value="izin">📝 Izin</option>
+                <option value="sakit">🏥 Sakit</option>
+                <option value="alfa">❌ Alfa</option>
+                <option value="breakLate">⏰ Break Late</option>
+                <option value="earlyLeave">🏃 Early Leave</option>
+                <option value="belumAbsen">⏳ Belum Absen</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Filtered and Sorted List */}
+        {(() => {
+          // Filter by status
+          let filteredList = list.filter(a => {
+            if (statusFilter === 'all') return true
+            
+            if (statusFilter === 'early') {
+              return a.checkInStatus === 'early'
+            } else if (statusFilter === 'onTime') {
+              return a.checkInStatus === 'onTime'
+            } else if (statusFilter === 'almostLate') {
+              return a.checkInStatus === 'almostLate'
+            } else if (statusFilter === 'late') {
+              return a.checkInStatus === 'late'
+            } else if (statusFilter === 'hadir') {
+              return a.status === 'Hadir' && a.checkIn && !a.checkInStatus
+            } else if (statusFilter === 'izin') {
+              return a.status === 'Izin'
+            } else if (statusFilter === 'sakit') {
+              return a.status === 'Sakit'
+            } else if (statusFilter === 'alfa') {
+              return a.status === 'Alfa'
+            } else if (statusFilter === 'breakLate') {
+              return a.breakLate === true
+            } else if (statusFilter === 'earlyLeave') {
+              return a.earlyLeave === true
+            } else if (statusFilter === 'belumAbsen') {
+              return !a.checkIn && a.status !== 'Izin' && a.status !== 'Sakit' && a.status !== 'Alfa'
+            }
+            return true
+          })
+
+          // Sort by date
+          filteredList = [...filteredList].sort((a, b) => {
+            const dateA = new Date(a.date)
+            const dateB = new Date(b.date)
+            if (sortOrder === 'asc') {
+              return dateA - dateB
+            } else {
+              return dateB - dateA
+            }
+          })
+
+          return (
+            <div className="space-y-3">
+              {filteredList.length === 0 ? (
+                <div className="text-center py-12">
+                  <svg className={`w-16 h-16 mx-auto mb-4 transition-colors ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <p className={`transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {statusFilter !== 'all' ? 'Tidak ada data dengan status yang dipilih' : 'Belum ada catatan absensi'}
+                  </p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  <div className={`text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Menampilkan {filteredList.length} dari {list.length} catatan
+                  </div>
+                  {filteredList.map((a) => (
+                    <div 
+                      key={a.id} 
+                      className={`card transition-colors cursor-pointer ${
+                        theme === 'dark' 
+                          ? 'bg-gray-700 border-gray-600 hover:border-indigo-500' 
+                          : 'bg-white border-gray-200 hover:border-indigo-300'
+                      }`}
+                      onClick={() => {
+                        setDetailAttendance(a)
+                        setShowDetailModal(true)
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
+                            <div className={`font-semibold transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{a.date}</div>
+                            {/* Status Izin/Sakit/Alfa - tampilkan jika bukan Hadir */}
+                            {a.status === 'Izin' && (
+                              <span className="status-chip status-warning">
+                                Izin
+                              </span>
+                            )}
+                            {a.status === 'Sakit' && (
+                              <span className="status-chip status-danger">
+                                Sakit
+                              </span>
+                            )}
+                            {a.status === 'Alfa' && (
+                              <span className="status-chip status-default">
+                                Alfa
+                              </span>
+                            )}
+                            {/* Status Check In - tampilkan sebagai status utama jika Hadir */}
+                            {a.status === 'Hadir' && a.checkIn && a.checkInStatus && (
+                              <span
+                                className={`status-chip font-semibold ${
+                                  a.checkInStatus === 'early'
+                                    ? 'bg-blue-100 text-blue-800 border-2 border-blue-400'
+                                    : a.checkInStatus === 'onTime'
+                                    ? 'bg-green-100 text-green-800 border-2 border-green-400'
+                                    : a.checkInStatus === 'almostLate'
+                                    ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400'
+                                    : 'bg-red-100 text-red-800 border-2 border-red-400'
+                                }`}
+                              >
+                                {a.checkInStatus === 'early' ? '⏰ Come Early' : a.checkInStatus === 'onTime' ? '✓ On Time' : a.checkInStatus === 'almostLate' ? '⚠ Almost Late' : '✗ Late'}
+                              </span>
+                            )}
+                            {/* Jika Hadir tapi belum ada checkInStatus, tampilkan Hadir */}
+                            {a.status === 'Hadir' && a.checkIn && !a.checkInStatus && (
+                              <span className="status-chip status-success">
+                                Hadir
+                              </span>
+                            )}
+                            {/* Status Break Late */}
+                            {a.breakLate && (
+                              <span className="status-chip bg-orange-100 text-orange-800 border border-orange-300 font-medium">
+                                ⏰ Break Late
+                              </span>
+                            )}
+                            {/* Status Early Leave */}
+                            {a.earlyLeave && (
+                              <span className="status-chip bg-blue-100 text-blue-800 border border-blue-300 font-medium">
+                                🏃 Early Leave
+                              </span>
+                            )}
+                            {/* Jika tidak ada status apapun */}
+                            {!a.checkIn && a.status !== 'Izin' && a.status !== 'Sakit' && a.status !== 'Alfa' && (
+                              <span className="status-chip status-default">
+                                Belum Absen
+                              </span>
+                            )}
+                            {/* Button to request status change - available for all attendances with check in */}
+                            {a.checkIn && (() => {
+                              const today = new Date().toISOString().slice(0, 10)
+                              const hasRequestToday = a.date === today && hasPendingRequestForDate(today)
+                              
+                              if (hasRequestToday) {
+                                return (
+                                  <span className="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-lg border border-yellow-300">
+                                    Request Pending
+                                  </span>
+                                )
+                              }
+                              
+                              return (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    openRequestModal(a)
+                                  }}
+                                  className="px-3 py-1 text-xs font-medium bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
+                                >
+                                  Request Perubahan
+                                </button>
+                              )
+                            })()}
+                          </div>
+                          <div className={`text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <div className="flex flex-wrap gap-3">
+                              <span className="inline-flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                CheckIn: {a.checkIn || '-'}
+                              </span>
+                              {(a.breakStart || a.breakEnd) && (
+                                <span className="inline-flex items-center gap-1">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Break: {a.breakStart || '-'} - {a.breakEnd || '-'}
+                                </span>
+                              )}
+                              <span className="inline-flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                CheckOut: {a.checkOut || '-'}
+                              </span>
+                            </div>
+                          </div>
+                          {a.note && (
+                            <div className={`text-sm rounded-lg p-2 border transition-colors ${
+                              theme === 'dark' 
+                                ? 'text-gray-300 bg-gray-600 border-gray-500' 
+                                : 'text-gray-600 bg-gray-50 border-gray-200'
+                            }`}>
+                              {a.note}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
-          ))}
-        </div>
+          )
+        })()}
       </div>
 
       {/* Request Status Change Modal */}
@@ -295,9 +509,13 @@ export default function Attendance() {
                     ? 'bg-gray-700 border-gray-600 text-gray-300' 
                     : 'bg-gray-50 border-gray-200'
                 }`}>
-                  {selectedAttendance.checkInStatus === 'late' ? '✗ Late' :
-                   selectedAttendance.breakLate ? '⏰ Break Late' :
-                   selectedAttendance.earlyLeave ? '🏃 Early Leave' : '-'}
+                  {requestForm.currentStatus === 'late' ? '✗ Late' :
+                   requestForm.currentStatus === 'almostLate' ? '⚠ Almost Late' :
+                   requestForm.currentStatus === 'early' ? '⏰ Come Early' :
+                   requestForm.currentStatus === 'onTime' ? '✓ On Time' :
+                   requestForm.currentStatus === 'breakLate' ? '⏰ Break Late' :
+                   requestForm.currentStatus === 'earlyLeave' ? '🏃 Early Leave' :
+                   requestForm.currentStatus === 'general' ? 'Hadir' : '-'}
                 </div>
               </div>
               
@@ -312,17 +530,32 @@ export default function Attendance() {
                       : 'bg-white border-gray-300'
                   }`}
                 >
-                  {selectedAttendance.checkInStatus === 'late' && (
+                  {requestForm.currentStatus === 'late' && (
                     <>
                       <option value="onTime">On Time</option>
                       <option value="almostLate">Almost Late</option>
                     </>
                   )}
-                  {selectedAttendance.breakLate && (
+                  {requestForm.currentStatus === 'almostLate' && (
+                    <option value="onTime">On Time</option>
+                  )}
+                  {requestForm.currentStatus === 'early' && (
+                    <option value="onTime">On Time</option>
+                  )}
+                  {requestForm.currentStatus === 'onTime' && (
+                    <option value="early">Come Early</option>
+                  )}
+                  {requestForm.currentStatus === 'breakLate' && (
                     <option value="normal">Normal (Hapus Break Late)</option>
                   )}
-                  {selectedAttendance.earlyLeave && (
+                  {requestForm.currentStatus === 'earlyLeave' && (
                     <option value="onTimeCheckout">On Time Checkout (Hapus Early Leave)</option>
+                  )}
+                  {requestForm.currentStatus === 'general' && (
+                    <>
+                      <option value="onTime">On Time</option>
+                      <option value="early">Come Early</option>
+                    </>
                   )}
                 </select>
               </div>
@@ -418,14 +651,16 @@ export default function Attendance() {
                   {detailAttendance.status === 'Hadir' && detailAttendance.checkIn && detailAttendance.checkInStatus && (
                     <span
                       className={`status-chip font-semibold ${
-                        detailAttendance.checkInStatus === 'onTime'
+                        detailAttendance.checkInStatus === 'early'
+                          ? 'bg-blue-100 text-blue-800 border-2 border-blue-400'
+                          : detailAttendance.checkInStatus === 'onTime'
                           ? 'bg-green-100 text-green-800 border-2 border-green-400'
                           : detailAttendance.checkInStatus === 'almostLate'
                           ? 'bg-yellow-100 text-yellow-800 border-2 border-yellow-400'
                           : 'bg-red-100 text-red-800 border-2 border-red-400'
                       }`}
                     >
-                      {detailAttendance.checkInStatus === 'onTime' ? '✓ On Time' : detailAttendance.checkInStatus === 'almostLate' ? '⚠ Almost Late' : '✗ Late'}
+                      {detailAttendance.checkInStatus === 'early' ? '⏰ Come Early' : detailAttendance.checkInStatus === 'onTime' ? '✓ On Time' : detailAttendance.checkInStatus === 'almostLate' ? '⚠ Almost Late' : '✗ Late'}
                     </span>
                   )}
                   {detailAttendance.status === 'Hadir' && detailAttendance.checkIn && !detailAttendance.checkInStatus && (
@@ -574,17 +809,41 @@ export default function Attendance() {
               )}
 
               {/* Request Button if applicable */}
-              {(detailAttendance.checkInStatus === 'late' || detailAttendance.breakLate || detailAttendance.earlyLeave) && (
+              {(detailAttendance.checkInStatus === 'late' || detailAttendance.checkInStatus === 'almostLate' || detailAttendance.breakLate || detailAttendance.earlyLeave || (detailAttendance.checkIn && detailAttendance.status === 'Hadir')) && (
                 <div className={`mt-6 pt-6 border-t transition-colors ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                  <button
-                    onClick={() => {
-                      setShowDetailModal(false)
-                      openRequestModal(detailAttendance)
-                    }}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-colors font-medium"
-                  >
-                    Request Perubahan Status
-                  </button>
+                  {(() => {
+                    const today = new Date().toISOString().slice(0, 10)
+                    const hasRequestToday = detailAttendance.date === today && hasPendingRequestForDate(today)
+                    
+                    if (hasRequestToday) {
+                      return (
+                        <div className={`p-4 rounded-lg border transition-colors ${
+                          theme === 'dark' 
+                            ? 'bg-yellow-900/30 border-yellow-700' 
+                            : 'bg-yellow-50 border-yellow-200'
+                        }`}>
+                          <div className={`text-sm font-medium mb-1 transition-colors ${theme === 'dark' ? 'text-yellow-200' : 'text-yellow-900'}`}>
+                            ⚠ Request Pending
+                          </div>
+                          <div className={`text-xs transition-colors ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
+                            Anda sudah membuat request perubahan status absensi untuk hari ini. Setiap user hanya dapat membuat 1 request per hari.
+                          </div>
+                        </div>
+                      )
+                    }
+                    
+                    return (
+                      <button
+                        onClick={() => {
+                          setShowDetailModal(false)
+                          openRequestModal(detailAttendance)
+                        }}
+                        className="w-full px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-colors font-medium"
+                      >
+                        Request Perubahan Status
+                      </button>
+                    )
+                  })()}
                 </div>
               )}
             </div>

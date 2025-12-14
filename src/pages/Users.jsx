@@ -52,8 +52,26 @@ export default function Users(){
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [userToDelete, setUserToDelete] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [userAttendanceStatus, setUserAttendanceStatus] = useState({}) // { userId: { status, checkInStatus, checkIn } }
 
-  useEffect(()=>{ load() },[])
+  useEffect(()=>{ 
+    load()
+    loadUserAttendanceStatus()
+    
+    // Refresh attendance status every 30 seconds
+    const interval = setInterval(loadUserAttendanceStatus, 30000)
+    
+    // Listen for custom event to refresh attendance status immediately
+    const handleRefreshAttendance = () => {
+      loadUserAttendanceStatus()
+    }
+    window.addEventListener('refreshAttendanceStatus', handleRefreshAttendance)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('refreshAttendanceStatus', handleRefreshAttendance)
+    }
+  },[])
 
   async function load(){
     setLoading(true)
@@ -66,6 +84,34 @@ export default function Users(){
       alert('Gagal memuat data user')
     }
     setLoading(false)
+  }
+
+  async function loadUserAttendanceStatus() {
+    try {
+      const token = localStorage.getItem('token')
+      const today = new Date().toISOString().slice(0, 10)
+      
+      // Get all attendances for today
+      const res = await axios.get('http://localhost:4000/api/attendances', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      
+      // Filter for today's attendance and create a map
+      const todayAttendances = res.data.filter(a => a.date === today)
+      const statusMap = {}
+      
+      todayAttendances.forEach(att => {
+        statusMap[att.userId] = {
+          status: att.status,
+          checkInStatus: att.checkInStatus,
+          checkIn: att.checkIn
+        }
+      })
+      
+      setUserAttendanceStatus(statusMap)
+    } catch (err) {
+      console.error('Error loading user attendance status:', err)
+    }
   }
 
   async function submit(e){
@@ -294,11 +340,18 @@ export default function Users(){
                 value={form.email} 
                 onChange={e=>setForm({...form,email:e.target.value})} 
                 className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                  theme === 'dark' 
-                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                    : 'bg-white border-gray-300'
+                  form.email && form.email.includes('@example.com')
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : theme === 'dark' 
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                      : 'bg-white border-gray-300'
                 }`}
               />
+              {form.email && form.email.includes('@example.com') && (
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                  ⚠ Email tidak boleh menggunakan domain example.com. Silakan gunakan email yang valid.
+                </p>
+              )}
             </div>
             <div>
               <label className={`block text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Password *</label>
@@ -694,12 +747,82 @@ export default function Users(){
                 
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex-1">
-                    <div className={`font-semibold text-lg mb-1 transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{u.name}</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className={`font-semibold text-lg transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{u.name}</div>
+                      {/* Attendance Status Indicator - Top Right */}
+                      {userAttendanceStatus[u.id] && (() => {
+                        const attStatus = userAttendanceStatus[u.id]
+                        if (attStatus.status === 'Hadir' && attStatus.checkIn) {
+                          // Show check-in status
+                          if (attStatus.checkInStatus === 'early') {
+                            return (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-300">
+                                ⏰ Early
+                              </span>
+                            )
+                          } else if (attStatus.checkInStatus === 'onTime') {
+                            return (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
+                                ✓ On Time
+                              </span>
+                            )
+                          } else if (attStatus.checkInStatus === 'almostLate') {
+                            return (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
+                                ⚠ Almost Late
+                              </span>
+                            )
+                          } else if (attStatus.checkInStatus === 'late') {
+                            return (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300">
+                                ✗ Late
+                              </span>
+                            )
+                          } else {
+                            return (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-300">
+                                ✓ Hadir
+                              </span>
+                            )
+                          }
+                        } else if (attStatus.status === 'Izin') {
+                          return (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
+                              📝 Izin
+                            </span>
+                          )
+                        } else if (attStatus.status === 'Sakit') {
+                          return (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-300">
+                              🏥 Sakit
+                            </span>
+                          )
+                        } else if (attStatus.status === 'Alfa') {
+                          return (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-300">
+                              ❌ Alfa
+                            </span>
+                          )
+                        } else {
+                          // Belum absen (status Hadir tapi belum check in)
+                          return (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-300">
+                              ⏳ Belum Absen
+                            </span>
+                          )
+                        }
+                      })()}
+                    </div>
                     <div className={`text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <div>@{u.username}</div>
-                      <div>{u.email}</div>
+                      <div className={`font-medium ${u.email && u.email.includes('@example.com') ? 'text-red-500' : ''}`}>
+                        {u.email || 'Email tidak tersedia'}
+                        {u.email && u.email.includes('@example.com') && (
+                          <span className="ml-2 text-xs text-yellow-600 dark:text-yellow-400">⚠ Perlu diupdate</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         u.role === 'admin' 
                           ? 'bg-purple-100 text-purple-800' 
@@ -820,11 +943,18 @@ export default function Users(){
                   value={form.email} 
                   onChange={e=>setForm({...form,email:e.target.value})} 
                   className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors ${
-                    theme === 'dark' 
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                      : 'bg-white border-gray-300'
+                    form.email && form.email.includes('@example.com')
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : theme === 'dark' 
+                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                        : 'bg-white border-gray-300'
                   }`}
                 />
+                {form.email && form.email.includes('@example.com') && (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                    ⚠ Email tidak boleh menggunakan domain example.com. Silakan gunakan email yang valid.
+                  </p>
+                )}
               </div>
               <div>
                 <label className={`block text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Employee ID *</label>

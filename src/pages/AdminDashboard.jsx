@@ -50,20 +50,20 @@ const IconChevronDown = () => (
 function MetricCard({ icon: Icon, title, value, iconBg, onClick, theme }) {
   return (
     <div 
-      className={`rounded-xl p-6 shadow-sm border hover:shadow-md transition-all ${onClick ? 'cursor-pointer' : ''} ${
+      className={`rounded-xl p-3 sm:p-4 lg:p-6 shadow-sm border hover:shadow-md transition-all ${onClick ? 'cursor-pointer' : ''} ${
         theme === 'dark' 
           ? 'bg-gray-800 border-gray-700 hover:border-gray-600' 
           : 'bg-white border-gray-100 hover:border-gray-200'
       }`}
       onClick={onClick}
     >
-      <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${iconBg}`}>
-          <Icon className="w-6 h-6 text-white" />
+      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+        <div className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
         </div>
-        <div className="flex-1">
-          <p className={`text-sm mb-1 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{title}</p>
-          <p className={`text-2xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{value.toLocaleString()}</p>
+        <div className="flex-1 min-w-0">
+          <p className={`text-xs sm:text-sm mb-1 transition-colors truncate ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{title}</p>
+          <p className={`text-lg sm:text-xl lg:text-2xl font-bold transition-colors truncate ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{value.toLocaleString()}</p>
         </div>
       </div>
     </div>
@@ -413,14 +413,14 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-    <div>
-        <h1 className={`text-3xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Dashboard</h1>
+      <div>
+        <h1 className={`text-2xl sm:text-3xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Dashboard</h1>
       </div>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <MetricCard
           icon={IconUsers}
           title="Total Users"
@@ -464,28 +464,28 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column - 2/3 width */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Average KPI Score Card */}
-          <div className={`rounded-xl p-6 shadow-sm border transition-colors ${
+          <div className={`rounded-xl p-4 sm:p-6 shadow-sm border transition-colors ${
             theme === 'dark' 
               ? 'bg-gray-800 border-gray-700' 
               : 'bg-white border-gray-100'
           }`}>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
               <div>
-                <h2 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Average KPI Score</h2>
+                <h2 className={`text-lg sm:text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Average KPI Score</h2>
                 <div className="mt-2">
-                  <span className={`text-3xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{averageKPI.toFixed(2)}</span>
-                  <span className={`text-sm ml-2 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>/ 100</span>
+                  <span className={`text-2xl sm:text-3xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{averageKPI.toFixed(2)}</span>
+                  <span className={`text-xs sm:text-sm ml-2 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>/ 100</span>
                 </div>
-                  </div>
-              <div className="relative">
+              </div>
+              <div className="relative w-full sm:w-auto">
                 <select
                   value={kpiMode}
                   onChange={(e) => setKpiMode(e.target.value)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-200 transition-colors ${
+                  className={`w-full sm:w-auto px-3 sm:px-4 py-2 rounded-lg border text-xs sm:text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-200 transition-colors ${
                     theme === 'dark' 
                       ? 'bg-gray-700 border-gray-600 text-white' 
                       : 'bg-white border-gray-200'
@@ -496,21 +496,21 @@ export default function AdminDashboard() {
                   <option value="yearly">Yearly</option>
                 </select>
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <IconChevronDown className={`transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
+                  <IconChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
                 </div>
               </div>
             </div>
 
             {/* Bar Chart */}
-            <div className="flex items-end justify-between gap-2 h-48 mt-6">
+            <div className="flex items-end justify-between gap-1 sm:gap-2 h-32 sm:h-48 mt-4 sm:mt-6 overflow-x-auto pb-2">
               {kpiHistory.length > 0 ? (
                 kpiHistory.map((item, index) => {
                   // Calculate height as percentage of max value (100) or relative to max in dataset
                   const maxValue = Math.max(...kpiHistory.map(h => h.value), 100)
                   const height = maxValue > 0 ? Math.max(10, (item.value / maxValue) * 100) : 10
                   return (
-                    <div key={index} className="flex-1 flex flex-col items-center">
-                      <div className="w-full flex items-end justify-center" style={{ height: '160px' }}>
+                    <div key={index} className="flex-1 flex flex-col items-center min-w-[40px] sm:min-w-0">
+                      <div className="w-full flex items-end justify-center" style={{ height: '100%', minHeight: '100px' }}>
                         <div
                           className="w-full rounded-t-lg transition-all hover:opacity-80 cursor-pointer"
                           style={{
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
                           title={`${item.label}: ${item.value.toFixed(2)}`}
                         />
                       </div>
-                      <span className={`text-xs mt-2 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</span>
+                      <span className={`text-[10px] sm:text-xs mt-2 transition-colors text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{item.label}</span>
                     </div>
                   )
                 })
@@ -531,116 +531,119 @@ export default function AdminDashboard() {
             </div>
 
             {/* Top Performance Section */}
-            <div className={`mt-8 pt-6 border-t transition-colors ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-              <h3 className={`text-lg font-semibold mb-4 transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Top Performance</h3>
-              <div className="space-y-3">
+            <div className={`mt-6 sm:mt-8 pt-4 sm:pt-6 border-t transition-colors ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+              <h3 className={`text-base sm:text-lg font-semibold mb-3 sm:mb-4 transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Top Performance</h3>
+              <div className="space-y-2 sm:space-y-3">
                 {topPerformers.length > 0 ? (
                   topPerformers.map((performer, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold" style={{ background: '#AF47D2' }}>
+                    <div key={index} className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-semibold flex-shrink-0" style={{ background: '#AF47D2' }}>
                         {performer.name.slice(0, 1).toUpperCase()}
                       </div>
-                      <div className="flex-1">
-                        <p className={`font-medium transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{performer.name}</p>
-                        <p className={`text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>KPI Score: {performer.tasks}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium text-sm sm:text-base truncate transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{performer.name}</p>
+                        <p className={`text-xs sm:text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>KPI Score: {performer.tasks}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className={`text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>No performance data available</p>
+                  <p className={`text-xs sm:text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>No performance data available</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Employees Table */}
-          <div className={`rounded-xl p-6 shadow-sm border transition-colors ${
+          <div className={`rounded-xl p-4 sm:p-6 shadow-sm border transition-colors ${
             theme === 'dark' 
               ? 'bg-gray-800 border-gray-700' 
               : 'bg-white border-gray-100'
           }`}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Employees</h2>
-                <button 
-                className="text-sm font-medium hover:opacity-80 transition-opacity" 
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className={`text-lg sm:text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Employees</h2>
+              <button 
+                className="text-xs sm:text-sm font-medium hover:opacity-80 transition-opacity" 
                 style={{ color: '#AF47D2' }}
                 onClick={() => navigate('/admin/users')}
               >
                 See all
-                </button>
+              </button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className={`border-b transition-colors ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-                    <th className={`text-left py-3 px-4 text-sm font-semibold transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>ID</th>
-                    <th className={`text-left py-3 px-4 text-sm font-semibold transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Name</th>
-                    <th className={`text-left py-3 px-4 text-sm font-semibold transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Role</th>
-                    <th className={`text-left py-3 px-4 text-sm font-semibold transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Performance</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.length > 0 ? (
-                    users.map((user) => {
-                      const performance = getUserPerformance(user.id) || 0
-                      return (
-                        <tr key={user.id} className={`border-b transition-colors ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-50 hover:bg-gray-50'}`}>
-                          <td className={`py-3 px-4 text-sm transition-colors ${theme === 'dark' ? 'text-gray-300' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>
-                            {user.employeeId || `EMP${String(user.id).padStart(6, '0')}`}
-                          </td>
-                          <td className="py-3 px-4">
-                            <div className={`font-medium transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{user.name}</div>
-                          </td>
-                          <td className={`py-3 px-4 text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{user.position || 'Employee'}</td>
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2">
-                              <div className={`flex-1 h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                                <div
-                                  className="h-full rounded-full transition-all"
-                                  style={{
-                                    width: `${Math.min(performance, 100)}%`,
-                                    background: '#AF47D2'
-                                  }}
-                                />
-                              </div>
-                              <span className={`text-xs w-10 text-right transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{performance}%</span>
-                              <IconMenu className={`transition-colors ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan="4" className={`py-8 text-center transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>No employees found</td>
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
+              <div className="inline-block min-w-full align-middle px-4 sm:px-0">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className={`border-b transition-colors ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
+                      <th className={`text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>ID</th>
+                      <th className={`text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Name</th>
+                      <th className={`text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold transition-colors hidden sm:table-cell ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Role</th>
+                      <th className={`text-left py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm font-semibold transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Performance</th>
                     </tr>
-                  )}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {users.length > 0 ? (
+                      users.map((user) => {
+                        const performance = getUserPerformance(user.id) || 0
+                        return (
+                          <tr key={user.id} className={`border-b transition-colors ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-50 hover:bg-gray-50'}`}>
+                            <td className={`py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm transition-colors ${theme === 'dark' ? 'text-gray-300' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>
+                              <span className="truncate block">{user.employeeId || `EMP${String(user.id).padStart(6, '0')}`}</span>
+                            </td>
+                            <td className="py-2 sm:py-3 px-2 sm:px-4">
+                              <div className={`font-medium text-xs sm:text-sm transition-colors truncate ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>{user.name}</div>
+                              <div className={`text-xs sm:hidden transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{user.position || 'Employee'}</div>
+                            </td>
+                            <td className={`py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm transition-colors hidden sm:table-cell ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{user.position || 'Employee'}</td>
+                            <td className="py-2 sm:py-3 px-2 sm:px-4">
+                              <div className="flex items-center gap-1.5 sm:gap-2">
+                                <div className={`flex-1 h-1.5 sm:h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                  <div
+                                    className="h-full rounded-full transition-all"
+                                    style={{
+                                      width: `${Math.min(performance, 100)}%`,
+                                      background: '#AF47D2'
+                                    }}
+                                  />
+                                </div>
+                                <span className={`text-[10px] sm:text-xs w-8 sm:w-10 text-right transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{performance}%</span>
+                                <IconMenu className={`w-3 h-3 sm:w-4 sm:h-4 transition-colors hidden sm:block ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className={`py-8 text-center transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>No employees found</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right Column - 1/3 width */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Pending Requests */}
-          <div className="rounded-xl p-6 shadow-lg" style={{ background: '#26355D' }}>
-            <h2 className="text-xl font-bold text-white mb-6">Pending Requests</h2>
-            <div className="space-y-4">
+          <div className="rounded-xl p-4 sm:p-6 shadow-lg" style={{ background: '#26355D' }}>
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Pending Requests</h2>
+            <div className="space-y-3 sm:space-y-4">
               {pendingRequests.length > 0 ? (
                 pendingRequests.map((request, index) => (
-                  <div key={index} className="flex items-start gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => {
+                  <div key={index} className="flex items-start gap-2 sm:gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => {
                     if (request.type === 'Leave') navigate('/admin/leave')
                     else if (request.type === 'Attendance') navigate('/admin/attendance-requests')
                     else if (request.type === 'DailyReport') navigate('/admin/daily-report-edit-requests')
                   }}>
                     <div className="w-2 h-2 rounded-full bg-white mt-2 flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="text-white font-medium text-sm">{request.title || request.type}</p>
-                      <p className="text-sm text-white/70 mt-1">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium text-xs sm:text-sm truncate">{request.title || request.type}</p>
+                      <p className="text-xs sm:text-sm text-white/70 mt-1 truncate">
                         {request.User?.name || `User ID: ${request.userId}`}
                       </p>
-                      <p className="text-xs text-white/50 mt-1">
+                      <p className="text-[10px] sm:text-xs text-white/50 mt-1">
                         {request.startDate ? new Date(request.startDate).toLocaleDateString('id-ID') : 
                          request.Attendance?.date ? new Date(request.Attendance.date).toLocaleDateString('id-ID') :
                          request.DailyReport?.date ? new Date(request.DailyReport.date).toLocaleDateString('id-ID') :
@@ -650,12 +653,12 @@ export default function AdminDashboard() {
                   </div>
                 ))
               ) : (
-                <p className="text-white/70 text-sm">No pending requests</p>
+                <p className="text-white/70 text-xs sm:text-sm">No pending requests</p>
               )}
             </div>
             {pendingRequests.length > 0 && (
                 <button 
-                className="mt-4 w-full text-sm text-white/80 hover:text-white transition-colors text-center"
+                className="mt-4 w-full text-xs sm:text-sm text-white/80 hover:text-white transition-colors text-center"
                 onClick={() => navigate('/admin/leave')}
                 >
                 See all →
@@ -664,21 +667,21 @@ export default function AdminDashboard() {
           </div>
 
           {/* Attendance Status */}
-          <div className={`rounded-xl p-6 shadow-sm border transition-colors ${
+          <div className={`rounded-xl p-4 sm:p-6 shadow-sm border transition-colors ${
             theme === 'dark' 
               ? 'bg-gray-800 border-gray-700' 
               : 'bg-white border-gray-100'
           }`}>
-            <h2 className={`text-xl font-bold mb-6 transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Attendance Status</h2>
-            <div className="space-y-4">
+            <h2 className={`text-lg sm:text-xl font-bold mb-4 sm:mb-6 transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Attendance Status</h2>
+            <div className="space-y-3 sm:space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`font-semibold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Hadir</span>
-                  <span className={`text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className={`font-semibold text-sm sm:text-base transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Hadir</span>
+                  <span className={`text-xs sm:text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     {total > 0 ? ((onSite / total) * 100).toFixed(1) : 0}%
                   </span>
                 </div>
-                <div className={`h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                <div className={`h-1.5 sm:h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -687,16 +690,16 @@ export default function AdminDashboard() {
                     }}
                   />
                 </div>
-                <p className={`text-sm mt-1 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{onSite.toLocaleString()} records</p>
+                <p className={`text-xs sm:text-sm mt-1 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{onSite.toLocaleString()} records</p>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`font-semibold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Izin</span>
-                  <span className={`text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className={`font-semibold text-sm sm:text-base transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Izin</span>
+                  <span className={`text-xs sm:text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     {total > 0 ? ((hybrid / total) * 100).toFixed(1) : 0}%
                   </span>
                 </div>
-                <div className={`h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                <div className={`h-1.5 sm:h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -705,16 +708,16 @@ export default function AdminDashboard() {
                     }}
                   />
                 </div>
-                <p className={`text-sm mt-1 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{hybrid.toLocaleString()} records</p>
+                <p className={`text-xs sm:text-sm mt-1 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{hybrid.toLocaleString()} records</p>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className={`font-semibold transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Sakit & Alfa</span>
-                  <span className={`text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <span className={`font-semibold text-sm sm:text-base transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Sakit & Alfa</span>
+                  <span className={`text-xs sm:text-sm transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     {total > 0 ? ((remote / total) * 100).toFixed(1) : 0}%
                   </span>
                 </div>
-                <div className={`h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                <div className={`h-1.5 sm:h-2 rounded-full overflow-hidden transition-colors ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -723,60 +726,60 @@ export default function AdminDashboard() {
                     }}
                   />
                 </div>
-                <p className={`text-sm mt-1 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{remote.toLocaleString()} records</p>
+                <p className={`text-xs sm:text-sm mt-1 transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{remote.toLocaleString()} records</p>
               </div>
             </div>
           </div>
 
           {/* Recent Daily Reports */}
           {recentReports.length > 0 && (
-            <div className={`rounded-xl p-6 shadow-sm border transition-colors ${
+            <div className={`rounded-xl p-4 sm:p-6 shadow-sm border transition-colors ${
               theme === 'dark' 
                 ? 'bg-gray-800 border-gray-700' 
                 : 'bg-white border-gray-100'
             }`}>
-              <h2 className={`text-xl font-bold mb-6 transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Recent Reports</h2>
-              <div className="space-y-3">
+              <h2 className={`text-lg sm:text-xl font-bold mb-4 sm:mb-6 transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>Recent Reports</h2>
+              <div className="space-y-2 sm:space-y-3">
                 {recentReports.slice(0, 3).map((report) => (
-                  <div key={report.id} className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0" style={{ background: '#AF47D2' }}>
+                  <div key={report.id} className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0" style={{ background: '#AF47D2' }}>
                       {report.User?.name?.slice(0, 1).toUpperCase() || 'R'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium truncate transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>
+                      <p className={`text-xs sm:text-sm font-medium truncate transition-colors ${theme === 'dark' ? 'text-white' : ''}`} style={theme === 'light' ? { color: '#26355D' } : {}}>
                         {report.User?.name || 'User'}
                       </p>
-                      <p className={`text-xs truncate transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{report.content?.substring(0, 50)}...</p>
-                      <p className={`text-xs mt-1 transition-colors ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                      <p className={`text-[10px] sm:text-xs truncate transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{report.content?.substring(0, 50)}...</p>
+                      <p className={`text-[10px] sm:text-xs mt-1 transition-colors ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                         {new Date(report.date).toLocaleDateString('id-ID')}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
-                <button 
-                className="mt-4 w-full text-sm font-medium hover:opacity-80 transition-opacity text-center"
+              <button 
+                className="mt-4 w-full text-xs sm:text-sm font-medium hover:opacity-80 transition-opacity text-center"
                 style={{ color: '#AF47D2' }}
                 onClick={() => navigate('/admin/daily-report')}
-                >
+              >
                 See all →
-                </button>
-          </div>
+              </button>
+            </div>
           )}
         </div>
       </div>
 
       {/* Camera Modal */}
       {cameraOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4">
           <div className={`rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border transition-colors ${
             theme === 'dark' 
               ? 'bg-gray-800 border-gray-700' 
               : 'bg-white border-gray-200'
           }`}>
-            <div className="p-4" style={{ background: 'linear-gradient(135deg, #26355D 0%, #AF47D2 100%)' }}>
+            <div className="p-3 sm:p-4" style={{ background: 'linear-gradient(135deg, #26355D 0%, #AF47D2 100%)' }}>
               <div className="flex justify-between items-center">
-                <div className="text-white font-bold text-lg">
+                <div className="text-white font-bold text-base sm:text-lg">
                   {cameraAction === 'checkin' ? '📷 Check In' : cameraAction === 'checkout' ? '📷 Check Out' : '☕ Istirahat'}
                 </div>
                 <button 
@@ -788,16 +791,16 @@ export default function AdminDashboard() {
                     } 
                     setCameraAction(null) 
                   }} 
-                  className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+                  className="text-white hover:bg-white/20 rounded-lg p-1.5 sm:p-2 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
             </div>
-            <div className={`p-4 transition-colors ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className={`mb-4 rounded-xl overflow-hidden bg-black border-4 shadow-inner aspect-video transition-colors ${
+            <div className={`p-3 sm:p-4 transition-colors ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+              <div className={`mb-3 sm:mb-4 rounded-xl overflow-hidden bg-black border-2 sm:border-4 shadow-inner aspect-video transition-colors ${
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-800'
               }`}>
                 {stream ? (
@@ -818,13 +821,13 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2 sm:gap-3">
                 <button 
                   onClick={async () => {
                     const video = videoRef.current || document.querySelector('video')
                     await captureAndSend(video) 
                   }} 
-                  className="flex-1 btn btn-primary text-white rounded-xl py-3"
+                  className="flex-1 btn btn-primary text-white rounded-xl py-2.5 sm:py-3 text-sm sm:text-base"
                   style={{ background: '#AF47D2' }}
                 >
                   {cameraAction === 'checkin' ? 'Check In' : cameraAction === 'checkout' ? 'Check Out' : 'Istirahat'}
@@ -838,7 +841,7 @@ export default function AdminDashboard() {
                     setCameraOpen(false)
                     setCameraAction(null) 
                   }} 
-                  className="btn btn-ghost"
+                  className="btn btn-ghost text-sm sm:text-base px-3 sm:px-4"
                 >
                   Batal
                 </button>

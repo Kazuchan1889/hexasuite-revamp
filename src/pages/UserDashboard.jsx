@@ -70,6 +70,8 @@ export default function UserDashboard(){
         setStream(null)
       }
       setCameraAction(null)
+      // Trigger refresh attendance status in other pages
+      window.dispatchEvent(new Event('refreshAttendanceStatus'))
       return res.data
     }catch(err){
       alert(err.response?.data?.message || 'Action failed')
@@ -195,18 +197,49 @@ export default function UserDashboard(){
                     {today.checkOut && <span>•</span>}
                     <span>CheckOut: {today.checkOut || '-'}</span>
                   </div>
+                  {/* Show status badges */}
+                  {!today.checkIn && today.status !== 'Izin' && today.status !== 'Sakit' && today.status !== 'Alfa' && (
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-300">
+                        Belum Absen
+                      </span>
+                    </div>
+                  )}
+                  {today.status === 'Izin' && (
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-400">
+                        Izin
+                      </span>
+                    </div>
+                  )}
+                  {today.status === 'Sakit' && (
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-400">
+                        Sakit
+                      </span>
+                    </div>
+                  )}
+                  {today.status === 'Alfa' && (
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-400">
+                        Alfa
+                      </span>
+                    </div>
+                  )}
                   {today.status === 'Hadir' && today.checkIn && today.checkInStatus && (
                     <div className="flex flex-wrap items-center gap-2 mt-2">
                       <span
                         className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                          today.checkInStatus === 'onTime'
+                          today.checkInStatus === 'early'
+                            ? 'bg-blue-100 text-blue-800 border border-blue-400'
+                            : today.checkInStatus === 'onTime'
                             ? 'bg-green-100 text-green-800 border border-green-400'
                             : today.checkInStatus === 'almostLate'
                             ? 'bg-yellow-100 text-yellow-800 border border-yellow-400'
                             : 'bg-red-100 text-red-800 border border-red-400'
                         }`}
                       >
-                        {today.checkInStatus === 'onTime' ? '✓ On Time' : today.checkInStatus === 'almostLate' ? '⚠ Almost Late' : '✗ Late'}
+                        {today.checkInStatus === 'early' ? '⏰ Come Early' : today.checkInStatus === 'onTime' ? '✓ On Time' : today.checkInStatus === 'almostLate' ? '⚠ Almost Late' : '✗ Late'}
                       </span>
                       {today.breakLate && (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-300">
@@ -230,7 +263,8 @@ export default function UserDashboard(){
             {/* Single take attendance button with dynamic label */}
             {(() => {
               // determine next action
-              if (!today) return (
+              // Show check in button if no today record OR if today record exists but no check in yet
+              if (!today || (today && !today.checkIn)) return (
                 <button 
                   onClick={() => openCameraFor('checkin')} 
                   className="text-lg font-bold px-8 py-4 lg:text-base lg:px-6 lg:py-3 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 animate-pulse text-white rounded-xl w-full lg:w-auto"

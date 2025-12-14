@@ -23,6 +23,9 @@ import Performance from './pages/Performance'
 import MyPerformance from './pages/MyPerformance'
 import DailyReport from './pages/DailyReport'
 import Profile from './pages/Profile'
+import AdminDevice from './pages/AdminDevice'
+import AdminDevice2 from './pages/AdminDevice2'
+import AdminBiometric from './pages/AdminBiometric'
 
 function RequireAuth({ children }){
   const [isValidating, setIsValidating] = useState(true)
@@ -117,6 +120,9 @@ export default function App(){
           <Route path="admin/users" element={<Users />} />
           <Route path="admin/payroll" element={<AdminPayroll />} />
           <Route path="admin/performance" element={<Performance />} />
+          <Route path="admin/biometric" element={<AdminBiometric />} />
+          <Route path="admin/device" element={<AdminDevice />} />
+          <Route path="admin/device2" element={<AdminDevice2 />} />
         </Route>
         {/* Default redirect to login if route not found */}
         <Route path="*" element={<Navigate to="/login" replace />} />

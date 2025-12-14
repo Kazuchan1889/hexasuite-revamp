@@ -125,6 +125,12 @@ const IconMoon = () => (
   </svg>
 )
 
+const IconBiometric = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+  </svg>
+)
+
 function NavLink({ to, icon: Icon, children, onClick, badge, theme }) {
   const location = useLocation()
   const isActive = location.pathname === to || (to !== '/' && location.pathname.startsWith(to))
@@ -252,6 +258,9 @@ function MobileMenu({ open, onClose, user, pendingCount, theme, toggleTheme, use
               <NavLink to="/admin/performance" icon={IconPerformance} onClick={onClose} theme={theme}>
                 Performance
               </NavLink>
+              <NavLink to="/admin/biometric" icon={IconBiometric} onClick={onClose} theme={theme}>
+                Biometric
+              </NavLink>
             </>
           ) : (
             <>
@@ -372,18 +381,29 @@ export default function Layout() {
             headers: { Authorization: `Bearer ${token}` }
           })
         ])
-        setPendingLeaveRequests(leaveRes.data || [])
-        setPendingAttendanceRequests(attendanceRes.data || [])
-        setPendingDailyReportEditRequests(dailyReportEditRes.data || [])
+        // Filter hanya yang status Pending untuk memastikan
+        setPendingLeaveRequests((leaveRes.data || []).filter(r => r.status === 'Pending'))
+        setPendingAttendanceRequests((attendanceRes.data || []).filter(r => r.status === 'Pending'))
+        setPendingDailyReportEditRequests((dailyReportEditRes.data || []).filter(r => r.status === 'Pending'))
       } catch (err) {
         console.error('Error loading pending requests:', err)
       }
     }
 
     loadPendingRequests()
-    // Refresh every 30 seconds
-    const interval = setInterval(loadPendingRequests, 30000)
-    return () => clearInterval(interval)
+    // Refresh every 15 seconds (reduced from 30 for faster updates)
+    const interval = setInterval(loadPendingRequests, 15000)
+    
+    // Listen for custom event to refresh notifications immediately
+    const handleRefreshNotifications = () => {
+      loadPendingRequests()
+    }
+    window.addEventListener('refreshNotifications', handleRefreshNotifications)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('refreshNotifications', handleRefreshNotifications)
+    }
   }, [])
 
   // Load notifications
@@ -552,6 +572,9 @@ export default function Layout() {
                 <NavLink to="/admin/performance" icon={IconPerformance} theme={theme}>
                   Performance
                 </NavLink>
+                <NavLink to="/admin/biometric" icon={IconBiometric} theme={theme}>
+                  Biometric
+                </NavLink>
               </>
             ) : (
               <>
@@ -617,27 +640,27 @@ export default function Layout() {
               ? 'bg-gray-800/95 border-gray-700' 
               : 'bg-white/95 border-gray-200'
           }`}>
-            <div className="flex items-center justify-between px-4 py-4 lg:px-8">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4 lg:px-8">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                 <button
                   onClick={() => setOpen(true)}
-                  className={`lg:hidden p-2 rounded-xl transition-colors ${
+                  className={`lg:hidden p-2 rounded-xl transition-colors flex-shrink-0 ${
                     theme === 'dark' ? 'hover:bg-gray-700 text-gray-200' : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
                   <IconMenu />
                 </button>
-                <div>
-                  <h1 className={`text-xl font-bold transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Absensi</h1>
+                <div className="min-w-0">
+                  <h1 className={`text-lg sm:text-xl font-bold transition-colors truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Absensi</h1>
                   <p className={`text-xs hidden sm:block transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-purple-600'}`}>Sistem Manajemen Absensi</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 {/* View Mode Toggle (Admin only) */}
                 {user?.role === 'admin' && (
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-medium transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className={`text-xs font-medium transition-colors hidden sm:inline ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       {userViewMode ? 'User' : 'Admin'}
                     </span>
                     <button
@@ -660,7 +683,7 @@ export default function Layout() {
                         }, 800) // 800ms loading delay
                       }}
                       disabled={isChangingView}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      className={`relative inline-flex h-6 w-11 sm:h-7 sm:w-14 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                         isChangingView
                           ? 'cursor-wait'
                           : 'cursor-pointer'
@@ -676,20 +699,20 @@ export default function Layout() {
                       title={userViewMode ? 'Switch to Admin View' : 'Switch to User View'}
                     >
                       {isChangingView ? (
-                        <span className={`inline-block h-5 w-5 transform rounded-full transition-transform duration-300 ${
-                          userViewMode ? 'translate-x-8' : 'translate-x-1'
+                        <span className={`inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full transition-transform duration-300 ${
+                          userViewMode ? 'translate-x-6 sm:translate-x-8' : 'translate-x-1'
                         }`}>
-                          <div className={`h-5 w-5 rounded-full flex items-center justify-center ${
+                          <div className={`h-4 w-4 sm:h-5 sm:w-5 rounded-full flex items-center justify-center ${
                             theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                           }`}>
-                            <div className={`h-3 w-3 border-2 rounded-full animate-spin ${
+                            <div className={`h-2.5 w-2.5 sm:h-3 sm:w-3 border-2 rounded-full animate-spin ${
                               theme === 'dark' ? 'border-purple-400 border-t-transparent' : 'border-purple-500 border-t-transparent'
                             }`}></div>
                           </div>
                         </span>
                       ) : (
-                        <span className={`inline-block h-5 w-5 transform rounded-full transition-transform duration-300 ${
-                          userViewMode ? 'translate-x-8' : 'translate-x-1'
+                        <span className={`inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full transition-transform duration-300 ${
+                          userViewMode ? 'translate-x-6 sm:translate-x-8' : 'translate-x-1'
                         } ${
                           theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                         } shadow-lg`}></span>
@@ -702,19 +725,21 @@ export default function Layout() {
                   <div className="relative notification-container">
                     <button
                       onClick={() => setNotificationOpen(!notificationOpen)}
-                      className={`relative p-2 rounded-xl transition-colors ${
+                      className={`relative p-1.5 sm:p-2 rounded-xl transition-colors ${
                         theme === 'dark' ? 'hover:bg-gray-700 text-gray-200' : 'hover:bg-gray-100 text-gray-700'
                       }`}
                     >
-                      <IconBell />
-                      {totalPendingCount > 0 && (
-                        <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></span>
-                      )}
+                      <IconBell className="w-5 h-5" />
+                      {totalPendingCount > 0 ? (
+                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 min-w-[1.25rem] h-5 text-xs font-bold text-white bg-red-500 rounded-full border-2 border-white animate-pulse">
+                          {totalPendingCount > 99 ? '99+' : totalPendingCount}
+                        </span>
+                      ) : null}
                     </button>
 
                     {/* Notification Popup */}
                     {notificationOpen && (
-                      <div className={`absolute right-0 mt-2 w-80 rounded-xl shadow-xl border z-50 animate-fade-in max-h-96 overflow-hidden flex flex-col transition-colors duration-300 ${
+                      <div className={`absolute right-0 mt-2 w-72 sm:w-80 rounded-xl shadow-xl border z-50 animate-fade-in max-h-96 overflow-hidden flex flex-col transition-colors duration-300 ${
                         theme === 'dark' 
                           ? 'bg-gray-800 border-gray-700' 
                           : 'bg-white border-gray-200'
@@ -787,7 +812,7 @@ export default function Layout() {
                                   key={`attendance-${request.id}`}
                                   onClick={() => {
                                     setNotificationOpen(false)
-                                    navigate('/admin/attendance-requests')
+                                    navigate('/admin/attendance')
                                   }}
                                   className={`w-full p-4 text-left transition-colors ${
                                     theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
@@ -864,13 +889,15 @@ export default function Layout() {
                           )}
                         </div>
                         {totalPendingCount > 0 && (
-                          <div className="p-3 border-t border-gray-200 bg-gray-50">
+                          <div className={`p-3 border-t transition-colors ${theme === 'dark' ? 'border-gray-700 bg-gray-700/50' : 'border-gray-200 bg-gray-50'}`}>
                             <button
                               onClick={() => {
                                 setNotificationOpen(false)
                                 navigate('/admin/leave')
                               }}
-                              className="w-full text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                              className={`w-full text-sm font-medium transition-colors ${
+                                theme === 'dark' ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-700'
+                              }`}
                             >
                               Lihat Semua →
                             </button>
@@ -885,7 +912,7 @@ export default function Layout() {
                 <div className="relative user-menu-container">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-200 ${
+                    className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all duration-200 ${
                       theme === 'dark' 
                         ? 'border-gray-700 bg-gray-800 hover:bg-gray-700' 
                         : 'border-gray-200 bg-white hover:bg-gray-50'
@@ -895,23 +922,23 @@ export default function Layout() {
                       <img
                         src={`http://localhost:4000${user.profilePicture}`}
                         alt={user?.name || 'User'}
-                        className="w-8 h-8 rounded-full object-cover border-2 border-gray-200"
+                        className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full text-white flex items-center justify-center font-semibold text-sm" style={{ background: 'linear-gradient(135deg, #AF47D2 0%, #8B3DB8 100%)' }}>
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white flex items-center justify-center font-semibold text-xs sm:text-sm flex-shrink-0" style={{ background: 'linear-gradient(135deg, #AF47D2 0%, #8B3DB8 100%)' }}>
                         {(user?.name || 'U').slice(0, 1).toUpperCase()}
                       </div>
                     )}
-                    <div className="hidden md:block text-left min-w-0">
-                      <div className={`text-sm font-semibold truncate transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{user?.name || 'Guest'}</div>
+                    <div className="hidden sm:block text-left min-w-0">
+                      <div className={`text-xs sm:text-sm font-semibold truncate transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{user?.name || 'Guest'}</div>
                       <div className={`text-xs truncate transition-colors ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{user?.email || user?.role || 'User'}</div>
                     </div>
-                    <IconChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    <IconChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0 hidden sm:block" />
                   </button>
 
                   {/* User Dropdown Menu */}
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-xl shadow-2xl border py-2 z-50" style={{ background: '#1a2440', borderColor: 'rgba(175, 71, 210, 0.3)' }}>
+                    <div className="absolute right-0 mt-2 w-44 sm:w-48 rounded-xl shadow-2xl border py-2 z-50" style={{ background: '#1a2440', borderColor: 'rgba(175, 71, 210, 0.3)' }}>
                       <Link
                         to="/profile"
                         onClick={() => setUserMenuOpen(false)}

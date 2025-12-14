@@ -87,8 +87,12 @@ export default function AdminAttendanceStatusRequests() {
   function getStatusLabel(status) {
     const map = {
       'late': '✗ Late',
+      'almostLate': '⚠ Almost Late',
+      'early': '⏰ Come Early',
+      'onTime': '✓ On Time',
       'breakLate': '⏰ Break Late',
-      'earlyLeave': '🏃 Early Leave'
+      'earlyLeave': '🏃 Early Leave',
+      'general': 'Hadir'
     }
     return map[status] || status
   }
@@ -97,6 +101,7 @@ export default function AdminAttendanceStatusRequests() {
     const map = {
       'onTime': '✓ On Time',
       'almostLate': '⚠ Almost Late',
+      'early': '⏰ Come Early',
       'normal': 'Normal',
       'onTimeCheckout': 'On Time Checkout'
     }
