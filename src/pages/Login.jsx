@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import IconP from '../../IconP.png'
 
 const IconUser = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,10 +151,10 @@ export default function Login() {
         {/* Logo */}
         <div className="absolute top-8 left-8 z-10">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg" style={{ background: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(10px)' }}>
-              A
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg overflow-hidden" style={{ background: 'rgba(255, 255, 255, 0.2)', backdropFilter: 'blur(10px)' }}>
+              <img src={IconP} alt="Logo" className="w-full h-full object-contain" />
             </div>
-            <span className="text-white text-2xl font-bold">Absensi</span>
+            <span className="text-white text-2xl font-bold">Hexa Suite</span>
           </div>
         </div>
 
