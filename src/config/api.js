@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://192.168.1.44:4000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 // Helper function to get full URL for API endpoints
 export const getApiUrl = (path = '') => {
