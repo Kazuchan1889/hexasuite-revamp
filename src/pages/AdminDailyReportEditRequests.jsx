@@ -29,7 +29,7 @@ export default function AdminDailyReportEditRequests() {
   async function loadUsers() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/users', {
+      const res = await axios.get(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUsers(res.data)
@@ -42,7 +42,7 @@ export default function AdminDailyReportEditRequests() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/daily-report-edit-requests', {
+      const res = await axios.get(`${API_URL}/api/daily-report-edit-requests`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       let data = res.data || []
@@ -65,7 +65,7 @@ export default function AdminDailyReportEditRequests() {
   async function action(id, status, adminNote = '') {
     try {
       const token = localStorage.getItem('token')
-      await axios.put(`http://localhost:4000/api/daily-report-edit-requests/${id}`, { 
+      await axios.put(`${API_URL}/api/daily-report-edit-requests/${id}`, { 
         status,
         adminNote 
       }, {
@@ -181,13 +181,13 @@ export default function AdminDailyReportEditRequests() {
                   <div className="mb-3">
                     {r.newFileType === 'image' ? (
                       <img 
-                        src={`http://localhost:4000${r.newFilePath}`} 
+                        src={getFileUrl(r.newFilePath)} 
                         alt="File baru" 
                         className="max-w-full h-auto rounded-lg border border-gray-200"
                       />
                     ) : (
                       <a 
-                        href={`http://localhost:4000${r.newFilePath}`} 
+                        href={getFileUrl(r.newFilePath)} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors"

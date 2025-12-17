@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import IconP from '../../IconP.png'
+import { API_URL, getFileUrl } from '../config/api'
 
 // Icon Components
 const IconHome = () => (
@@ -346,7 +348,7 @@ export default function Layout() {
       if (!token) return
       
       try {
-        const res = await axios.get('http://localhost:4000/api/users/me', {
+        const res = await axios.get(`${API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         const userData = res.data
@@ -371,13 +373,13 @@ export default function Layout() {
 
       try {
         const [leaveRes, attendanceRes, dailyReportEditRes] = await Promise.all([
-          axios.get('http://localhost:4000/api/leaverequests/pending', {
+          axios.get(`${API_URL}/api/leaverequests/pending`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          axios.get('http://localhost:4000/api/attendance-status-requests/pending', {
+          axios.get(`${API_URL}/api/attendance-status-requests/pending`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          axios.get('http://localhost:4000/api/daily-report-edit-requests/pending', {
+          axios.get(`${API_URL}/api/daily-report-edit-requests/pending`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         ])
@@ -413,7 +415,7 @@ export default function Layout() {
       if (!token) return
 
       try {
-        const res = await axios.get('http://localhost:4000/api/notifications', {
+        const res = await axios.get(`${API_URL}/api/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         setNotifications(res.data || [])
@@ -517,18 +519,11 @@ export default function Layout() {
           }`}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
-                {iconError ? (
-                  <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg" style={{ background: 'linear-gradient(135deg, #AF47D2 0%, #8B3DB8 100%)' }}>
-                    A
-                  </div>
-                ) : (
-                  <img 
-                    src="/IconP.png" 
-                    alt="HexaSuite" 
-                    className="w-full h-full object-cover" 
-                    onError={() => setIconError(true)}
-                  />
-                )}
+                <img 
+                  src={IconP} 
+                  alt="HexaSuite" 
+                  className="w-full h-full object-cover" 
+                />
               </div>
               <div className="flex-1 min-w-0">
                 <div className={`text-base font-bold leading-tight transition-colors ${theme === 'dark' ? 'text-white' : 'text-indigo-900'}`}>
@@ -920,7 +915,7 @@ export default function Layout() {
                   >
                     {user?.profilePicture ? (
                       <img
-                        src={`http://localhost:4000${user.profilePicture}`}
+                        src={getFileUrl(user.profilePicture)}
                         alt={user?.name || 'User'}
                         className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
                       />

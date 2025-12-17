@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL, getFileUrl } from '../config/api'
 
 export default function Attendance() {
   const { theme } = useTheme()
@@ -27,7 +28,7 @@ export default function Attendance() {
   async function loadUserRequests() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendance-status-requests', {
+      const res = await axios.get(`${API_URL}/api/attendance-status-requests`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUserRequests(res.data || [])
@@ -48,7 +49,7 @@ export default function Attendance() {
   async function load() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendances/me', {
+      const res = await axios.get(`${API_URL}/api/attendances/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setList(res.data.reverse())
@@ -143,7 +144,7 @@ export default function Attendance() {
     setSubmitting(true)
     try {
       const token = localStorage.getItem('token')
-      await axios.post('http://localhost:4000/api/attendance-status-requests', {
+      await axios.post(`${API_URL}/api/attendance-status-requests`, {
         attendanceId: selectedAttendance.id,
         currentStatus: requestForm.currentStatus,
         requestedStatus: requestForm.requestedStatus,
@@ -725,7 +726,7 @@ export default function Attendance() {
                     <div className={`text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Foto Check In</div>
                     <div className="relative">
                       <img
-                        src={`http://localhost:4000${detailAttendance.checkInPhotoPath}`}
+                        src={getFileUrl(detailAttendance.checkInPhotoPath)}
                         alt="Check In Photo"
                         className={`w-full rounded-lg border shadow-sm object-cover transition-colors ${
                           theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
@@ -762,7 +763,7 @@ export default function Attendance() {
                     <div className={`text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Foto Check Out</div>
                     <div className="relative">
                       <img
-                        src={`http://localhost:4000${detailAttendance.checkOutPhotoPath}`}
+                        src={getFileUrl(detailAttendance.checkOutPhotoPath)}
                         alt="Check Out Photo"
                         className={`w-full rounded-lg border shadow-sm object-cover transition-colors ${
                           theme === 'dark' ? 'border-gray-600' : 'border-gray-200'

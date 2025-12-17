@@ -19,7 +19,7 @@ export default function Payroll() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get(`http://localhost:4000/api/payroll/me?month=${month}`, {
+      const res = await axios.get(`${API_URL}/api/payroll/me?month=${month}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setPayroll(res.data)

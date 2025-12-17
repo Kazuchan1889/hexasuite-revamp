@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 export default function Reports(){
   const [month, setMonth] = useState('')
   function download(path){
-    const url = `http://localhost:4000/api${path}?month=${month}`
+    const url = `${API_URL}/api${path}?month=${month}`
     window.open(url, '_blank')
   }
   return (

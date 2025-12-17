@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL, getFileUrl } from '../config/api'
 
 export default function DailyReport() {
   const { theme } = useTheme()
@@ -26,7 +27,7 @@ export default function DailyReport() {
   async function load() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/daily-reports', {
+      const res = await axios.get(`${API_URL}/api/daily-reports`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setReports(res.data || [])
@@ -146,7 +147,7 @@ export default function DailyReport() {
           payload.file = base64
 
           try {
-            await axios.post('http://localhost:4000/api/daily-report-edit-requests', payload, {
+            await axios.post(`${API_URL}/api/daily-report-edit-requests`, payload, {
               headers: { Authorization: `Bearer ${token}` }
             })
             setShowEditModal(false)
@@ -166,7 +167,7 @@ export default function DailyReport() {
         reader.readAsDataURL(editFile)
       } else {
         try {
-          await axios.post('http://localhost:4000/api/daily-report-edit-requests', payload, {
+          await axios.post(`${API_URL}/api/daily-report-edit-requests`, payload, {
             headers: { Authorization: `Bearer ${token}` }
           })
           setShowEditModal(false)
@@ -211,7 +212,7 @@ export default function DailyReport() {
           payload.file = base64
 
           try {
-            await axios.post('http://localhost:4000/api/daily-reports', payload, {
+            await axios.post(`${API_URL}/api/daily-reports`, payload, {
               headers: { Authorization: `Bearer ${token}` }
             })
             setContent('')
@@ -229,7 +230,7 @@ export default function DailyReport() {
         reader.readAsDataURL(file)
       } else {
         try {
-          await axios.post('http://localhost:4000/api/daily-reports', payload, {
+          await axios.post(`${API_URL}/api/daily-reports`, payload, {
             headers: { Authorization: `Bearer ${token}` }
           })
           setContent('')
@@ -332,7 +333,7 @@ export default function DailyReport() {
                 <div className="mt-3">
                   {report.fileType === 'image' ? (
                     <img 
-                      src={`http://localhost:4000${report.filePath}`} 
+                      src={getFileUrl(report.filePath)} 
                       alt="Lampiran" 
                       className={`max-w-full h-auto rounded-lg border transition-colors ${
                         theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
@@ -340,7 +341,7 @@ export default function DailyReport() {
                     />
                   ) : (
                     <a 
-                      href={`http://localhost:4000${report.filePath}`} 
+                      href={getFileUrl(report.filePath)} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${

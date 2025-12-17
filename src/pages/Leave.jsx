@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL } from '../config/api'
 
 function StatusChip({ status, theme }){
   const map = {
@@ -50,7 +51,7 @@ export default function Leave(){
   async function loadUserData(){
     try{
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/users/me', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await axios.get(`${API_URL}/api/users/me`, { headers: { Authorization: `Bearer ${token}` } })
       setUserData(res.data)
       // Update localStorage user data
       localStorage.setItem('user', JSON.stringify(res.data))
@@ -62,7 +63,7 @@ export default function Leave(){
   async function load(){
     try{
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/leaverequests', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await axios.get(`${API_URL}/api/leaverequests`, { headers: { Authorization: `Bearer ${token}` } })
       // Backend already filters by user role, so we just use the response
       setRequests(res.data || [])
       // Also refresh user data when loading requests (in case quota changed)
@@ -98,7 +99,7 @@ export default function Leave(){
     setLoading(true)
     try{
       const token = localStorage.getItem('token')
-      await axios.post('http://localhost:4000/api/leaverequests', { startDate, endDate, reason, type }, { headers: { Authorization: `Bearer ${token}` } })
+      await axios.post(`${API_URL}/api/leaverequests`, { startDate, endDate, reason, type }, { headers: { Authorization: `Bearer ${token}` } })
       setStartDate(''); setEndDate(''); setReason(''); setType('Izin')
       setShowModal(false)
       await load()
@@ -110,7 +111,7 @@ export default function Leave(){
   async function action(id, status){
     try{
       const token = localStorage.getItem('token')
-      await axios.put(`http://localhost:4000/api/leaverequests/${id}`, { status }, { headers: { Authorization: `Bearer ${token}` } })
+      await axios.put(`${API_URL}/api/leaverequests/${id}`, { status }, { headers: { Authorization: `Bearer ${token}` } })
       await load()
     }catch(err){ alert(err.response?.data?.message || 'Action failed') }
   }

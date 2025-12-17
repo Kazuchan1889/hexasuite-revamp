@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL, getFileUrl } from '../config/api'
 
 // Icon Components
 const IconUsers = () => (
@@ -149,7 +150,7 @@ export default function AdminDashboard() {
   async function load() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendances', {
+      const res = await axios.get(`${API_URL}/api/attendances`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const list = res.data
@@ -169,7 +170,7 @@ export default function AdminDashboard() {
   async function loadUsers() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/users', {
+      const res = await axios.get(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const userList = res.data.filter(u => u.role === 'user')
@@ -184,7 +185,7 @@ export default function AdminDashboard() {
   async function loadDailyReports() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/daily-reports', {
+      const res = await axios.get(`${API_URL}/api/daily-reports`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setTotalDailyReports(res.data.length)
@@ -197,7 +198,7 @@ export default function AdminDashboard() {
   async function loadPayrolls() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/payroll', {
+      const res = await axios.get(`${API_URL}/api/payroll`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setTotalPayrolls(res.data.length || 0)
@@ -212,13 +213,13 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem('token')
       const [leaveRes, attendanceRes, dailyReportEditRes] = await Promise.all([
-        axios.get('http://localhost:4000/api/leaverequests/pending', {
+        axios.get(`${API_URL}/api/leaverequests/pending`, {
           headers: { Authorization: `Bearer ${token}` }
         }).catch(() => ({ data: [] })),
-        axios.get('http://localhost:4000/api/attendance-status-requests/pending', {
+        axios.get(`${API_URL}/api/attendance-status-requests/pending`, {
           headers: { Authorization: `Bearer ${token}` }
         }).catch(() => ({ data: [] })),
-        axios.get('http://localhost:4000/api/daily-report-edit-requests/pending', {
+        axios.get(`${API_URL}/api/daily-report-edit-requests/pending`, {
           headers: { Authorization: `Bearer ${token}` }
         }).catch(() => ({ data: [] }))
       ])
@@ -243,7 +244,7 @@ export default function AdminDashboard() {
       if (kpiMode === 'monthly') {
         // Load current month KPI
         const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-        const res = await axios.get(`http://localhost:4000/api/performance?mode=monthly&month=${month}`, {
+        const res = await axios.get(`${API_URL}/api/performance?mode=monthly&month=${month}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         
@@ -262,7 +263,7 @@ export default function AdminDashboard() {
           const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
           const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
           try {
-            const histRes = await axios.get(`http://localhost:4000/api/performance?mode=monthly&month=${monthStr}`, {
+            const histRes = await axios.get(`${API_URL}/api/performance?mode=monthly&month=${monthStr}`, {
               headers: { Authorization: `Bearer ${token}` }
             })
             historyData.push({
@@ -279,7 +280,7 @@ export default function AdminDashboard() {
       } else {
         // Yearly mode - load current year and last 5 years
         const currentYear = now.getFullYear()
-        const res = await axios.get(`http://localhost:4000/api/performance?mode=yearly&year=${currentYear}`, {
+        const res = await axios.get(`${API_URL}/api/performance?mode=yearly&year=${currentYear}`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         
@@ -297,7 +298,7 @@ export default function AdminDashboard() {
         for (let i = 5; i >= 0; i--) {
           const year = currentYear - i
           try {
-            const histRes = await axios.get(`http://localhost:4000/api/performance?mode=yearly&year=${year}`, {
+            const histRes = await axios.get(`${API_URL}/api/performance?mode=yearly&year=${year}`, {
               headers: { Authorization: `Bearer ${token}` }
             })
             historyData.push({
@@ -322,7 +323,7 @@ export default function AdminDashboard() {
   async function loadMyAttendance() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendances/me', {
+      const res = await axios.get(`${API_URL}/api/attendances/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const list = res.data || []
@@ -358,7 +359,7 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('token')
       const body = { action }
       if (photo) body.photo = photo
-      await axios.post('http://localhost:4000/api/attendances/action', body, {
+      await axios.post(`${API_URL}/api/attendances/action`, body, {
         headers: { Authorization: `Bearer ${token}` }
       })
       await loadMyAttendance()

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import IconP from '../../IconP.png'
+import { API_URL } from '../config/api'
 
 const IconUser = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +81,7 @@ export default function Login() {
       
       try {
         // Validate token by calling API
-        const res = await axios.get('http://localhost:4000/api/users/me', {
+        const res = await axios.get(`${API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         
@@ -109,7 +110,7 @@ export default function Login() {
     setErr('')
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:4000/api/auth/login', { username, password })
+      const res = await axios.post(`${API_URL}/api/auth/login`, { username, password })
       localStorage.setItem('token', res.data.token)
       // Store user data including profilePicture
       localStorage.setItem('user', JSON.stringify(res.data.user))

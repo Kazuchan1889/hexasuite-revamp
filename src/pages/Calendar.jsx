@@ -7,7 +7,7 @@ export default function Calendar(){
   async function load(){
     try{
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/leaverequests', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await axios.get(`${API_URL}/api/leaverequests`, { headers: { Authorization: `Bearer ${token}` } })
       // show only approved as events
       const ev = res.data.filter(r=>r.status==='Approved').map(r=> ({ title: r.User?.name || 'Leave', date: r.startDate }))
       setEvents(ev)

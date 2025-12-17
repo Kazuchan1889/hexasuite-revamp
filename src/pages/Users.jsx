@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL } from '../config/api'
 
 const IconEdit = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +78,7 @@ export default function Users(){
     setLoading(true)
     try{ 
       const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:4000/api/users', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await axios.get(`${API_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } })
       setUsers(res.data)
     }catch(err){ 
       console.error(err)
@@ -92,7 +93,7 @@ export default function Users(){
       const today = new Date().toISOString().slice(0, 10)
       
       // Get all attendances for today
-      const res = await axios.get('http://localhost:4000/api/attendances', {
+      const res = await axios.get(`${API_URL}/api/attendances`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -134,7 +135,7 @@ export default function Users(){
           updatePayload.leaveQuotaOther = null
         }
         
-        await axios.put(`http://localhost:4000/api/users/${editingUser.id}`, updatePayload, { headers: { Authorization: `Bearer ${token}` } })
+        await axios.put(`${API_URL}/api/users/${editingUser.id}`, updatePayload, { headers: { Authorization: `Bearer ${token}` } })
         alert('User berhasil diperbarui')
         setShowEditModal(false)
         setEditingUser(null)
@@ -160,7 +161,7 @@ export default function Users(){
           createPayload.leaveQuotaOther = null
         }
         
-        await axios.post('http://localhost:4000/api/users', createPayload, { headers: { Authorization: `Bearer ${token}` } })
+        await axios.post(`${API_URL}/api/users`, createPayload, { headers: { Authorization: `Bearer ${token}` } })
         alert('User berhasil ditambahkan')
         setShowForm(false)
         load() // Reload users list to show the new user
@@ -237,7 +238,7 @@ export default function Users(){
     if (!userToDelete) return
     try {
       const token = localStorage.getItem('token')
-      await axios.delete(`http://localhost:4000/api/users/${userToDelete.id}`, { headers: { Authorization: `Bearer ${token}` } })
+      await axios.delete(`${API_URL}/api/users/${userToDelete.id}`, { headers: { Authorization: `Bearer ${token}` } })
       alert('User berhasil dihapus')
       setShowDeleteModal(false)
       setUserToDelete(null)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL } from '../config/api'
 
 export default function Performance() {
   const { theme } = useTheme()
@@ -20,7 +21,7 @@ export default function Performance() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      let url = `http://localhost:4000/api/performance?mode=${mode}`
+      let url = `${API_URL}/api/performance?mode=${mode}`
       if (mode === 'yearly') {
         url += `&year=${year}`
       } else {
@@ -58,7 +59,7 @@ export default function Performance() {
   async function viewUserDetail(userId) {
     try {
       const token = localStorage.getItem('token')
-      let url = `http://localhost:4000/api/performance/user/${userId}?mode=${mode}`
+      let url = `${API_URL}/api/performance/user/${userId}?mode=${mode}`
       if (mode === 'yearly') {
         url += `&year=${year}`
       } else {

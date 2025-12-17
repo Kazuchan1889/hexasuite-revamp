@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { API_URL, getFileUrl } from '../config/api'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
 
@@ -50,7 +51,7 @@ export default function Profile() {
         return
       }
       
-      const res = await axios.get('http://localhost:4000/api/users/me', {
+      const res = await axios.get(`${API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const user = res.data
@@ -89,7 +90,7 @@ export default function Profile() {
       
       // Set profile picture
       if (user.profilePicture) {
-        setProfilePicturePreview(`http://localhost:4000${user.profilePicture}`)
+        setProfilePicturePreview(getFileUrl(user.profilePicture))
         setProfilePicture(null) // Reset upload state
       } else {
         setProfilePicturePreview(null)
@@ -168,7 +169,7 @@ export default function Profile() {
       }
 
       console.log('Sending PUT request to /api/users/me')
-      const res = await axios.put('http://localhost:4000/api/users/me', payload, {
+      const res = await axios.put(`${API_URL}/api/users/me`, payload, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -177,7 +178,7 @@ export default function Profile() {
       
       // Update profile picture preview if updated
       if (res.data.profilePicture) {
-        setProfilePicturePreview(`http://localhost:4000${res.data.profilePicture}`)
+        setProfilePicturePreview(getFileUrl(res.data.profilePicture))
       } else {
         setProfilePicturePreview(null)
       }
@@ -647,7 +648,7 @@ export default function Profile() {
                   return
                 }
                 
-                const res = await axios.put('http://localhost:4000/api/users/me', {
+                const res = await axios.put(`${API_URL}/api/users/me`, {
                   password: passwordForm.password
                 }, {
                   headers: { 

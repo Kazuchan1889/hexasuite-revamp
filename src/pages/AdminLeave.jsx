@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL } from '../config/api'
 
 function StatusChip({ status, theme }) {
   const map = {
@@ -28,7 +29,7 @@ export default function AdminLeave() {
   async function loadUsers() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/users', {
+      const res = await axios.get(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUsers(res.data)
@@ -41,7 +42,7 @@ export default function AdminLeave() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/leaverequests', {
+      const res = await axios.get(`${API_URL}/api/leaverequests`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       let data = res.data || []
@@ -71,7 +72,7 @@ export default function AdminLeave() {
   async function action(id, status) {
     try {
       const token = localStorage.getItem('token')
-      await axios.put(`http://localhost:4000/api/leaverequests/${id}`, { status }, {
+      await axios.put(`${API_URL}/api/leaverequests/${id}`, { status }, {
         headers: { Authorization: `Bearer ${token}` }
       })
       await load()

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL } from '../config/api'
 
 export default function MyPerformance() {
   const { theme } = useTheme()
@@ -25,7 +26,7 @@ export default function MyPerformance() {
         return
       }
       
-      let url = `http://localhost:4000/api/performance/me?mode=${mode}`
+      let url = `${API_URL}/api/performance/me?mode=${mode}`
       if (mode === 'yearly') {
         url += `&year=${year}`
       } else {

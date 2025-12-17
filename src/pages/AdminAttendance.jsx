@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL, getFileUrl } from '../config/api'
 
 export default function AdminAttendance() {
   const { theme } = useTheme()
@@ -84,7 +85,7 @@ export default function AdminAttendance() {
       const today = new Date().toISOString().slice(0, 10)
       
       // Get all attendances for today
-      const res = await axios.get('http://localhost:4000/api/attendances', {
+      const res = await axios.get(`${API_URL}/api/attendances`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       
@@ -114,7 +115,7 @@ export default function AdminAttendance() {
   async function loadHolidaySettings() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/user-holiday-settings', {
+      const res = await axios.get(`${API_URL}/api/user-holiday-settings`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setHolidaySettings(res.data || [])
@@ -137,7 +138,7 @@ export default function AdminAttendance() {
     setSavingHoliday(true)
     try {
       const token = localStorage.getItem('token')
-      await axios.post(`http://localhost:4000/api/user-holiday-settings/user/${userId}`, {
+      await axios.post(`${API_URL}/api/user-holiday-settings/user/${userId}`, {
         day1: parseInt(holidayForm.day1),
         day2: holidayForm.day2 ? parseInt(holidayForm.day2) : null,
         isActive: holidayForm.isActive
@@ -163,7 +164,7 @@ export default function AdminAttendance() {
     
     try {
       const token = localStorage.getItem('token')
-      await axios.delete(`http://localhost:4000/api/user-holiday-settings/user/${userId}`, {
+      await axios.delete(`${API_URL}/api/user-holiday-settings/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       alert('Pengaturan hari libur berhasil dihapus')
@@ -197,7 +198,7 @@ export default function AdminAttendance() {
     setBulkAssigningTime(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.post('http://localhost:4000/api/user-time-settings/bulk-assign', {
+      const res = await axios.post(`${API_URL}/api/user-time-settings/bulk-assign`, {
         userIds: selectedUsersForTime,
         checkInTime: settings.checkInTime,
         checkOutTime: settings.checkOutTime,
@@ -233,7 +234,7 @@ export default function AdminAttendance() {
     setBulkAssigningHoliday(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.post('http://localhost:4000/api/user-holiday-settings/bulk-assign', {
+      const res = await axios.post(`${API_URL}/api/user-holiday-settings/bulk-assign`, {
         userIds: selectedUsersForHoliday,
         day1: parseInt(holidayForm.day1),
         day2: holidayForm.day2 ? parseInt(holidayForm.day2) : null,
@@ -272,7 +273,7 @@ export default function AdminAttendance() {
   async function loadSettings() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/settings', {
+      const res = await axios.get(`${API_URL}/api/settings`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const settingsData = {}
@@ -306,7 +307,7 @@ export default function AdminAttendance() {
       ]
       
       for (const setting of settingsToSave) {
-        await axios.post('http://localhost:4000/api/settings', setting, {
+        await axios.post(`${API_URL}/api/settings`, setting, {
           headers: { Authorization: `Bearer ${token}` }
         })
       }
@@ -323,7 +324,7 @@ export default function AdminAttendance() {
   async function loadUsers() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/users', {
+      const res = await axios.get(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUsers(res.data)
@@ -336,7 +337,7 @@ export default function AdminAttendance() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendances', {
+      const res = await axios.get(`${API_URL}/api/attendances`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       let data = res.data || []
@@ -375,7 +376,7 @@ export default function AdminAttendance() {
   async function loadPendingRequests() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendance-status-requests/pending', {
+      const res = await axios.get(`${API_URL}/api/attendance-status-requests/pending`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       // Filter hanya yang status Pending
@@ -400,7 +401,7 @@ export default function AdminAttendance() {
     try {
       const token = localStorage.getItem('token')
       await axios.put(
-        `http://localhost:4000/api/attendance-status-requests/${request.id}`,
+        `${API_URL}/api/attendance-status-requests/${request.id}`,
         {
           status: status,
           adminNote: adminNote || undefined
@@ -1306,7 +1307,7 @@ export default function AdminAttendance() {
                         <img
                           src={user.profilePicture.startsWith('data:') 
                             ? user.profilePicture 
-                            : `http://localhost:4000${user.profilePicture}`}
+                            : getFileUrl(user.profilePicture)}
                           alt={user.name}
                           className="w-12 h-12 rounded-full object-cover border-2 border-indigo-300"
                         />
@@ -1717,7 +1718,7 @@ export default function AdminAttendance() {
                   <img
                     src={selectedAttendance.User.profilePicture.startsWith('data:') 
                       ? selectedAttendance.User.profilePicture 
-                      : `http://localhost:4000${selectedAttendance.User.profilePicture}`}
+                      : getFileUrl(selectedAttendance.User.profilePicture)}
                     alt={selectedAttendance.User.name}
                     className={`w-16 h-16 rounded-full object-cover border-2 transition-colors ${
                       theme === 'dark' ? 'border-purple-500' : 'border-indigo-200'
@@ -1822,7 +1823,7 @@ export default function AdminAttendance() {
                     <div className={`text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Foto Check In</div>
                     <div className="relative">
                       <img
-                        src={`http://localhost:4000${selectedAttendance.checkInPhotoPath}`}
+                        src={getFileUrl(selectedAttendance.checkInPhotoPath)}
                         alt="Check In Photo"
                         className={`w-full rounded-lg border shadow-sm object-cover transition-colors ${
                           theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
@@ -1859,7 +1860,7 @@ export default function AdminAttendance() {
                     <div className={`text-sm font-medium mb-2 transition-colors ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>Foto Check Out</div>
                     <div className="relative">
                       <img
-                        src={`http://localhost:4000${selectedAttendance.checkOutPhotoPath}`}
+                        src={getFileUrl(selectedAttendance.checkOutPhotoPath)}
                         alt="Check Out Photo"
                         className={`w-full rounded-lg border shadow-sm object-cover transition-colors ${
                           theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
@@ -2038,7 +2039,7 @@ export default function AdminAttendance() {
                     <img
                       src={selectedRequest.User.profilePicture.startsWith('data:') 
                         ? selectedRequest.User.profilePicture 
-                        : `http://localhost:4000${selectedRequest.User.profilePicture}`}
+                        : getFileUrl(selectedRequest.User.profilePicture)}
                       alt={selectedRequest.User.name}
                       className="w-16 h-16 rounded-full object-cover border-2 border-indigo-300"
                     />
@@ -2378,7 +2379,7 @@ export default function AdminAttendance() {
                   setExporting(true)
                   try {
                     const token = localStorage.getItem('token')
-                    const response = await axios.get('http://localhost:4000/api/reports/export-excel', {
+                    const response = await axios.get(`${API_URL}/api/reports/export-excel`, {
                       params: {
                         startDate: exportDateRange.startDate,
                         endDate: exportDateRange.endDate

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { API_URL } from '../config/api'
 
 function StatusChip({ status }) {
   const map = {
@@ -32,7 +33,7 @@ export default function AdminAttendanceStatusRequests() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendance-status-requests', {
+      const res = await axios.get(`${API_URL}/api/attendance-status-requests`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       let data = res.data || []
@@ -63,7 +64,7 @@ export default function AdminAttendanceStatusRequests() {
     try {
       const token = localStorage.getItem('token')
       await axios.put(
-        `http://localhost:4000/api/attendance-status-requests/${selectedRequest.id}`,
+        `${API_URL}/api/attendance-status-requests/${selectedRequest.id}`,
         {
           status: actionType === 'approve' ? 'Approved' : 'Rejected',
           adminNote: adminNote || undefined

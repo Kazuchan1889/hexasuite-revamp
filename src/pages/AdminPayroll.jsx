@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL } from '../config/api'
 
 const IconEdit = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +50,7 @@ export default function AdminPayroll() {
   async function loadUsers() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/users', {
+      const res = await axios.get(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUsers(res.data)
@@ -63,7 +64,7 @@ export default function AdminPayroll() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/payroll-settings', {
+      const res = await axios.get(`${API_URL}/api/payroll-settings`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setPayrollSettings(res.data)
@@ -119,7 +120,7 @@ export default function AdminPayroll() {
     try {
       const token = localStorage.getItem('token')
       await axios.post(
-        `http://localhost:4000/api/payroll-settings/user/${selectedUser.id}`,
+        `${API_URL}/api/payroll-settings/user/${selectedUser.id}`,
         form,
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -142,7 +143,7 @@ export default function AdminPayroll() {
     }
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/payroll-settings/calculate', {
+      const res = await axios.get(`${API_URL}/api/payroll-settings/calculate`, {
         params: {
           userId: calculateForm.userId,
           month: calculateForm.month
@@ -218,7 +219,7 @@ export default function AdminPayroll() {
       for (const userId of selectedUsers) {
         try {
           await axios.post(
-            `http://localhost:4000/api/payroll-settings/user/${userId}`,
+            `${API_URL}/api/payroll-settings/user/${userId}`,
             form,
             { headers: { Authorization: `Bearer ${token}` } }
           )

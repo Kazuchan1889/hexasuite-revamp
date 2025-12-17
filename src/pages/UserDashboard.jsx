@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL, getFileUrl } from '../config/api'
 
 export default function UserDashboard(){
   const { theme } = useTheme()
@@ -17,7 +18,7 @@ export default function UserDashboard(){
   async function load(){
     try{
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/attendances/me', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await axios.get(`${API_URL}/api/attendances/me`, { headers: { Authorization: `Bearer ${token}` } })
       const list = res.data
       setAttendance(list.reverse())
       setSummary({
@@ -62,7 +63,7 @@ export default function UserDashboard(){
       const token = localStorage.getItem('token')
       const body = { action }
       if (photo) body.photo = photo
-      const res = await axios.post('http://localhost:4000/api/attendances/action', body, { headers: { Authorization: `Bearer ${token}` } })
+      const res = await axios.post(`${API_URL}/api/attendances/action`, body, { headers: { Authorization: `Bearer ${token}` } })
       await load()
       setCameraOpen(false)
       if (stream){
@@ -548,8 +549,8 @@ export default function UserDashboard(){
                   </div>
                   <div className="flex gap-2 flex-wrap">
                     {a.checkInPhotoPath && (
-                      <a href={`http://localhost:4000${a.checkInPhotoPath}`} target="_blank" rel="noreferrer" className="group">
-                        <img src={`http://localhost:4000${a.checkInPhotoPath}`} alt="checkin" className={`w-20 h-20 object-cover rounded-lg border-2 transition-colors shadow-sm ${
+                      <a href={getFileUrl(a.checkInPhotoPath)} target="_blank" rel="noreferrer" className="group">
+                        <img src={getFileUrl(a.checkInPhotoPath)} alt="checkin" className={`w-20 h-20 object-cover rounded-lg border-2 transition-colors shadow-sm ${
                           theme === 'dark' 
                             ? 'border-gray-600 group-hover:border-purple-500' 
                             : 'border-gray-200 group-hover:border-indigo-400'
@@ -557,8 +558,8 @@ export default function UserDashboard(){
                       </a>
                     )}
                     {a.breakPhotoPath && (
-                      <a href={`http://localhost:4000${a.breakPhotoPath}`} target="_blank" rel="noreferrer" className="group">
-                        <img src={`http://localhost:4000${a.breakPhotoPath}`} alt="break" className={`w-20 h-20 object-cover rounded-lg border-2 transition-colors shadow-sm ${
+                      <a href={getFileUrl(a.breakPhotoPath)} target="_blank" rel="noreferrer" className="group">
+                        <img src={getFileUrl(a.breakPhotoPath)} alt="break" className={`w-20 h-20 object-cover rounded-lg border-2 transition-colors shadow-sm ${
                           theme === 'dark' 
                             ? 'border-gray-600 group-hover:border-purple-500' 
                             : 'border-gray-200 group-hover:border-indigo-400'
@@ -566,8 +567,8 @@ export default function UserDashboard(){
                       </a>
                     )}
                     {a.checkOutPhotoPath && (
-                      <a href={`http://localhost:4000${a.checkOutPhotoPath}`} target="_blank" rel="noreferrer" className="group">
-                        <img src={`http://localhost:4000${a.checkOutPhotoPath}`} alt="checkout" className={`w-20 h-20 object-cover rounded-lg border-2 transition-colors shadow-sm ${
+                      <a href={getFileUrl(a.checkOutPhotoPath)} target="_blank" rel="noreferrer" className="group">
+                        <img src={getFileUrl(a.checkOutPhotoPath)} alt="checkout" className={`w-20 h-20 object-cover rounded-lg border-2 transition-colors shadow-sm ${
                           theme === 'dark' 
                             ? 'border-gray-600 group-hover:border-purple-500' 
                             : 'border-gray-200 group-hover:border-indigo-400'

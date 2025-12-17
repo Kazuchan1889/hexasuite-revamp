@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import axios from 'axios'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { API_URL } from './config/api'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Attendance from './pages/Attendance'
@@ -45,7 +46,7 @@ function RequireAuth({ children }){
 
       // Validate token by calling API
       try {
-        const res = await axios.get('http://localhost:4000/api/users/me', {
+        const res = await axios.get(`${API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         

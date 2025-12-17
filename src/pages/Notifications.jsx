@@ -7,7 +7,7 @@ export default function Notifications(){
   async function load(){
     try{
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/notifications', { headers: { Authorization: `Bearer ${token}` } })
+      const res = await axios.get(`${API_URL}/api/notifications`, { headers: { Authorization: `Bearer ${token}` } })
       setNotes(res.data || [])
     }catch(err){ console.error(err) }
   }

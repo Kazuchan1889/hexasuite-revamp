@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useTheme } from '../contexts/ThemeContext'
+import { API_URL, getFileUrl } from '../config/api'
 
 export default function AdminDailyReport() {
   const { theme } = useTheme()
@@ -49,7 +50,7 @@ export default function AdminDailyReport() {
   async function loadUsers() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/users', {
+      const res = await axios.get(`${API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setUsers(res.data)
@@ -61,7 +62,7 @@ export default function AdminDailyReport() {
   async function loadSettings() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/daily-reports/settings', {
+      const res = await axios.get(`${API_URL}/api/daily-reports/settings`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setSettings(res.data)
@@ -73,7 +74,7 @@ export default function AdminDailyReport() {
   async function loadEditRequests() {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/daily-report-edit-requests/pending', {
+      const res = await axios.get(`${API_URL}/api/daily-report-edit-requests/pending`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       setEditRequests(res.data || [])
@@ -87,7 +88,7 @@ export default function AdminDailyReport() {
       const token = localStorage.getItem('token')
       const adminNote = status === 'Rejected' ? prompt('Masukkan catatan penolakan (opsional):') || '' : ''
       
-      await axios.put(`http://localhost:4000/api/daily-report-edit-requests/${requestId}`, {
+      await axios.put(`${API_URL}/api/daily-report-edit-requests/${requestId}`, {
         status,
         adminNote: adminNote || null
       }, {
@@ -110,7 +111,7 @@ export default function AdminDailyReport() {
     setLoading(true)
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/daily-reports', {
+      const res = await axios.get(`${API_URL}/api/daily-reports`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       let data = res.data || []
@@ -133,7 +134,7 @@ export default function AdminDailyReport() {
   async function loadUserReports(userId) {
     try {
       const token = localStorage.getItem('token')
-      const res = await axios.get('http://localhost:4000/api/daily-reports', {
+      const res = await axios.get(`${API_URL}/api/daily-reports`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const data = res.data || []
@@ -163,7 +164,7 @@ export default function AdminDailyReport() {
   async function saveSettings() {
     try {
       const token = localStorage.getItem('token')
-      await axios.put('http://localhost:4000/api/daily-reports/settings', settings, {
+      await axios.put(`${API_URL}/api/daily-reports/settings`, settings, {
         headers: { Authorization: `Bearer ${token}` }
       })
       alert('Pengaturan berhasil disimpan')
@@ -236,7 +237,7 @@ export default function AdminDailyReport() {
                       <div className="flex items-center gap-3 mb-3">
                         {user.profilePicture ? (
                           <img 
-                            src={`http://localhost:4000${user.profilePicture}`} 
+                            src={getFileUrl(user.profilePicture)} 
                             alt={user.name}
                             className={`w-12 h-12 rounded-full object-cover border-2 transition-colors ${
                               theme === 'dark' ? 'border-purple-500' : 'border-indigo-200'
@@ -299,7 +300,7 @@ export default function AdminDailyReport() {
             <div className="flex items-center gap-3">
               {selectedUser.profilePicture ? (
                 <img 
-                  src={`http://localhost:4000${selectedUser.profilePicture}`} 
+                  src={getFileUrl(selectedUser.profilePicture)} 
                   alt={selectedUser.name}
                   className={`w-10 h-10 rounded-full object-cover border-2 transition-colors ${
                     theme === 'dark' ? 'border-purple-500' : 'border-indigo-200'
@@ -377,7 +378,7 @@ export default function AdminDailyReport() {
                   <div className="mt-3">
                     {report.fileType === 'image' ? (
                       <img 
-                        src={`http://localhost:4000${report.filePath}`} 
+                        src={getFileUrl(report.filePath)} 
                         alt="Lampiran" 
                         className={`max-w-full h-auto rounded-lg border transition-colors ${
                           theme === 'dark' ? 'border-gray-600' : 'border-gray-200'
@@ -385,7 +386,7 @@ export default function AdminDailyReport() {
                       />
                     ) : (
                       <a 
-                        href={`http://localhost:4000${report.filePath}`} 
+                        href={getFileUrl(report.filePath)} 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -445,7 +446,7 @@ export default function AdminDailyReport() {
                         <div className="mb-3">
                           {editRequest.newFileType === 'image' ? (
                             <img 
-                              src={`http://localhost:4000${editRequest.newFilePath}`} 
+                              src={getFileUrl(editRequest.newFilePath)} 
                               alt="File baru" 
                               className={`max-w-full h-auto rounded-lg border transition-colors ${
                                 theme === 'dark' ? 'border-gray-600' : 'border-yellow-200'
@@ -453,7 +454,7 @@ export default function AdminDailyReport() {
                             />
                           ) : (
                             <a 
-                              href={`http://localhost:4000${editRequest.newFilePath}`} 
+                              href={getFileUrl(editRequest.newFilePath)} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm border ${
